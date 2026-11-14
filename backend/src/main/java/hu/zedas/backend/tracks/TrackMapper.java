@@ -15,5 +15,7 @@ public interface TrackMapper {
 
     @Mapping(target = "albumId", source = "album.albumId")
     @Mapping(target = "albumTitle", source = "album.title")
+    @Mapping(target = "genreId", source = "genre.genreId")
+    @Mapping(target = "genreName", source = "genre.name")
     TrackResponse toResponse(TrackEntity entity);
 }

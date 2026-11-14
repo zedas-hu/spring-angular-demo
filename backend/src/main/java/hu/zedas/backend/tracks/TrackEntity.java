@@ -3,6 +3,7 @@ package hu.zedas.backend.tracks;
 import java.math.BigDecimal;
 
 import hu.zedas.backend.albums.AlbumEntity;
+import hu.zedas.backend.genres.GenreEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -51,8 +52,12 @@ public class TrackEntity {
     @Column(name = "MediaTypeId", nullable = false)
     private Integer mediaTypeId;
 
-    @Column(name = "GenreId")
-    private Integer genreId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GenreId")
+    private GenreEntity genre;
+
+    // @Column(name = "GenreId")
+    // private Integer genreId;
 
     @Column(name = "Composer", length = 220)
     private String composer;
@@ -104,13 +109,13 @@ public class TrackEntity {
         this.mediaTypeId = mediaTypeId;
     }
 
-    public Integer getGenreId() {
-        return genreId;
-    }
+    // public Integer getGenreId() {
+    //     return genreId;
+    // }
 
-    public void setGenreId(Integer genreId) {
-        this.genreId = genreId;
-    }
+    // public void setGenreId(Integer genreId) {
+    //     this.genreId = genreId;
+    // }
 
     public String getComposer() {
         return composer;

@@ -1,0 +1,17 @@
+{
+  "name": "spring-book",
+  "private": true,
+  "packageManager": "npm@12.2.0",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run backend:compile && concurrently --kill-others --names backend,frontend \"npm:backend:start\" \"npm:frontend:start\"",
+    "backend:compile": "mvn -f backend/pom.xml compile",
+    "backend:start": "mvn -f backend/pom.xml spring-boot:run",
+    "frontend:start": "npm run start --workspace frontend -- --proxy-config proxy.conf.json"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}
