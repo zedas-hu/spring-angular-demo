@@ -1,9 +1,9 @@
 $ErrorActionPreference = 'Stop'
 
 $projectRoot = $PSScriptRoot
-$seedDatabase = Join-Path $projectRoot 'database\seed\bookstore.db'
+$seedDatabase = Join-Path $projectRoot 'database\seed\chinook.db'
 $dataDirectory = Join-Path $projectRoot 'database\data'
-$database = Join-Path $dataDirectory 'bookstore.db'
+$database = Join-Path $dataDirectory 'chinook.db'
 
 if (-not (Test-Path -LiteralPath $seedDatabase -PathType Leaf)) {
     throw "Seed database not found: $seedDatabase"

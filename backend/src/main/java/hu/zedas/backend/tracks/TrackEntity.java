@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import hu.zedas.backend.albums.AlbumEntity;
 import hu.zedas.backend.genres.GenreEntity;
+import hu.zedas.backend.media_types.MediaTypeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,23 +43,6 @@ public class TrackEntity {
     @Column(name = "Name", length = 200, nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "AlbumId")
-    private AlbumEntity album;
-
-    // @Column(name = "AlbumId")
-    // private Integer albumId;
-
-    @Column(name = "MediaTypeId", nullable = false)
-    private Integer mediaTypeId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "GenreId")
-    private GenreEntity genre;
-
-    // @Column(name = "GenreId")
-    // private Integer genreId;
-
     @Column(name = "Composer", length = 220)
     private String composer;
 
@@ -84,38 +68,6 @@ public class TrackEntity {
     public void setName(String name) {
         this.name = name;
     }
-
-    // public Integer getAlbumId() {
-    //     return albumId;
-    // }
-
-    // public void setAlbumId(Integer albumId) {
-    //     this.albumId = albumId;
-    // }
-
-    public AlbumEntity getAlbum() {
-        return album;
-    }
-
-    public void setAlbum(AlbumEntity album) {
-        this.album = album;
-    }
-
-    public Integer getMediaTypeId() {
-        return mediaTypeId;
-    }
-
-    public void setMediaTypeId(Integer mediaTypeId) {
-        this.mediaTypeId = mediaTypeId;
-    }
-
-    // public Integer getGenreId() {
-    //     return genreId;
-    // }
-
-    // public void setGenreId(Integer genreId) {
-    //     this.genreId = genreId;
-    // }
 
     public String getComposer() {
         return composer;
@@ -147,5 +99,43 @@ public class TrackEntity {
 
     public void setUnitPrice(BigDecimal unitPrice) {
         this.unitPrice = unitPrice;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "AlbumId")
+    private AlbumEntity album;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MediaTypeId")
+    private MediaTypeEntity mediaType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GenreId")
+    private GenreEntity genre;
+
+    public AlbumEntity getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(AlbumEntity album) {
+        this.album = album;
+    }
+
+    public MediaTypeEntity getMediaType() {
+        return mediaType;
+    }
+
+    public  void setMediaType(MediaTypeEntity mediaType) {
+        this.mediaType = mediaType;
+    }
+
+    public GenreEntity getGenre() {
+        return genre;
+    }
+
+    public void setGenre(GenreEntity genre) {
+        this.genre = genre;
     }
 }

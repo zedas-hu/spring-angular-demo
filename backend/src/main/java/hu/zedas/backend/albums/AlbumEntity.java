@@ -1,10 +1,14 @@
 package hu.zedas.backend.albums;
 
+import hu.zedas.backend.artists.ArtistEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 // CREATE TABLE "albums"
 // (
@@ -25,8 +29,9 @@ public class AlbumEntity {
     @Column (name = "Title", nullable = false, length = 160)
     private String title;
 
-    @Column (name = "ArtistId", nullable = false)
-    private Integer artistId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ArtistId", nullable = false)
+    private ArtistEntity artist;
 
     protected AlbumEntity() {
     }
@@ -47,11 +52,11 @@ public class AlbumEntity {
         this.title = title;
     }       
 
-    public Integer getArtistId() {
-        return artistId;
+    public ArtistEntity getArtist() {
+        return artist;
     }
 
-    public void setArtistId(Integer artistId) {
-        this.artistId = artistId;
+    public void setArtist(ArtistEntity artist) {
+        this.artist = artist;
     }
 }
