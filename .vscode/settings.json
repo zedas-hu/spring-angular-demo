@@ -1,0 +1,19 @@
+{
+	"java.configuration.runtimes": [
+		{
+			"name": "JavaSE-27",
+			"path": "C:\\Java\\jdk-27.0.1.0.3",
+			"default": true
+		}
+	],
+	"maven.terminal.customEnv": [
+		{
+			"environmentVariable": "JAVA_HOME",
+			"value": "C:\\Java\\jdk-27.0.1.0.3"
+		}
+	],
+	"terminal.integrated.env.windows": {
+		"JAVA_HOME": "C:\\Java\\jdk-27.0.1.0.3",
+		"PATH": "C:\\Java\\jdk-27.0.1.0.3\\bin;${env:PATH}"
+	}
+}

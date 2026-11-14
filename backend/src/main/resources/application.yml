@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: backend
+  config:
+    import: "optional:file:.env[.properties]"
+  datasource:
+    url: "${DB_URL}"
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      connection-init-sql: "PRAGMA foreign_keys=ON"
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
