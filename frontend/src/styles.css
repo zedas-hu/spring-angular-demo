@@ -2,8 +2,17 @@
 body {
     font-family: Verdana, Geneva, sans-serif;
     font-size: 22px;
+    background-color: var(--page-background);
+    color: var(--font-color);
 }
 
 :root {
-    --line-color: red;
+    --page-background: light-dark(white, black);
+    --font-color: light-dark(black, white);
+    --line-color: light-dark(grey, lime);
+    --button-background: light-dark(#e0e0e0, #050);
+    --button-color: light-dark(black, lime);
+    --button-disabled-background: light-dark(lightgray, #030);
+    --button-disabled-color: light-dark(gray, black);
+    --data-color: light-dark(white, #a5ffa5);
 }

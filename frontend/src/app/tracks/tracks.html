@@ -1,38 +1,53 @@
-@if (pageResource.isLoading()) {
-    <p>Loading tracks...</p>
-}
-@if (pageResource.error(); as error) {
-    <p role="alert">Could not load tracks: {{ errorMessage(error) }}</p>
-}
-@if (pageResource.hasValue()) {
-    @let page = pageResource.value();
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Album</th>
-                <th>Genre</th>
-                <th>Composer</th>
-                <th>Length</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (track of page.content; track track.trackId) {
-            <tr>
-                <td>{{ track.name }}</td>
-                <td>{{ track.albumTitle }}</td>
-                <td>{{ track.genreName }}</td>
-                <td>{{ track.composer }}</td>
-                <td style="text-align: right">{{ convertToMinutes(track.milliseconds) }}</td>
-            </tr>
-            }
-        </tbody>
-    </table>
-    <div class="pager">
-        <button class="mover" (click)="firstPage()" [disabled]="page.first">|←</button>
-        <button class="mover" (click)="previousPage()" [disabled]="page.first">←</button>
-        <span>Page {{ page.number + 1 }} of {{ page.totalPages }}</span>
-        <button class="mover" (click)="nextPage()" [disabled]="page.last">→</button>
-        <button class="mover" (click)="lastPage()" [disabled]="page.last">→|</button>
-    </div>
-}
+<div class="container">
+    @if (pageResource.isLoading()) {
+        <p>Loading tracks...</p>
+    }
+    @else if (pageResource.error(); as error) {
+        <p role="alert">Could not load tracks: {{ errorMessage(error) }}</p>
+    }
+    @else if (pageResource.hasValue()) {
+        @let page = pageResource.value();
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Album</th>
+                    <th>Genre</th>
+                    <th>Composer</th>
+                    <th>Length</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (track of page.content; track track.trackId) {
+                    <tr>
+                        <td>{{ track.name }}</td>
+                        <td>{{ track.albumTitle }}</td>
+                        <td>{{ track.genreName }}</td>
+                        <td>{{ track.composer }}</td>
+                        <td style="text-align: right">{{ convertToMinutes(track.milliseconds) }}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @if (pageResource.hasValue()) {
+        @let page = pageResource.value();
+        <div class="pager">
+            <button class="mover" (click)="firstPage()" [disabled]="page.first">|←</button>
+            <button class="mover" (click)="previousPage()" [disabled]="page.first">←</button>
+            <span>Page {{ page.number + 1 }} of {{ page.totalPages }}</span>
+            <button class="mover" (click)="nextPage()" [disabled]="page.last">→</button>
+            <button class="mover" (click)="lastPage()" [disabled]="page.last">→|</button>
+        </div>
+    }
+    @else {
+        <div class="pager">
+            <button class="mover" (click)="firstPage()" [disabled]="true">|←</button>
+            <button class="mover" (click)="previousPage()" [disabled]="true">←</button>
+            <span>–</span>
+            <button class="mover" (click)="nextPage()" [disabled]="true">→</button>
+            <button class="mover" (click)="lastPage()" [disabled]="true">→|</button>
+        </div>
+    }
+</div>
