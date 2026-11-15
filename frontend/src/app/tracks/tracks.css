@@ -1,0 +1,49 @@
+table {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 3rem;
+    gap: 0.5rem;
+
+    thead {
+        display: contents;
+        tr {
+            display: contents;
+            th {
+                text-align: left;
+                border-bottom: 1px solid var(--line-color);
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    }
+
+    tbody {
+        display: contents;
+        tr {
+            display: contents;
+            td {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+    }
+}
+
+div.pager {
+    display: grid;
+    grid-template-columns: 3rem 3rem 1fr 3rem 3rem;
+    gap: 0.5rem;
+
+    border-top: 1px solid var(--line-color);
+    margin-top: 1rem;
+    padding-top: 1rem;
+
+    button.mover {
+        font-family: Arial;
+        font-size: 1rem;
+    }
+
+    span {
+        text-align: center;
+    }
+}

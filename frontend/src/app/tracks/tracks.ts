@@ -1,51 +1,57 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { TracksService } from './tracks.service';
-import { AsyncPipe } from '@angular/common';
-import { switchMap } from 'rxjs';
+import { TracksService, SortType, SortDirection } from './tracks.service';
 
 @Component({
-  imports: [AsyncPipe],
   selector: 'app-tracks',
-  template: `
-@if (page$ | async; as page) {
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Album</th>
-        <th>Genre</th>
-        <th>Media type</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (track of page.content; track track.trackId) {
-        <tr>
-          <td>{{ track.name }}</td>
-          <td>{{ track.albumTitle }}</td>
-          <td>{{ track.genreName }}</td>
-          <td>{{ track.mediaTypeName }}</td>
-        </tr>
-      }
-    </tbody>
-  </table>
-}
-`
+  styleUrls: ['./tracks.css'],
+  templateUrl: './tracks.html'
 })
 export class Tracks {
   private readonly tracksService = inject(TracksService);
   private readonly route = inject(ActivatedRoute);
+  private readonly routeParams = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
 
-  static readonly pageSize = 20;
-  currentPage = 0;
-  // readonly page$ = this.tracksService.getPage(this.currentPage, Tracks.pageSize);
-  readonly page$ = this.route.queryParamMap.pipe(
-    switchMap((params) =>
-      this.tracksService.getPage(
-        this.currentPage,
-        Tracks.pageSize,
-        params.get('sort') ?? undefined,
-      ),
-    ),
-  );
+  constructor() {
+    this.syncSort();
+    effect(() => this.syncSort());
+  }
+
+  private syncSort(): void {
+    const sp = this.routeParams().get('sort');
+    const [sort = 'name', direction = 'asc'] = (sp ? sp.split(',') : []);
+    this.tracksService.setSort(sort as SortType, direction as SortDirection);
+  }
+
+  readonly pageResource = this.tracksService.pageData;
+
+  convertToMinutes(milliseconds: number | null): string {
+    if (milliseconds === null) return '';
+    const minutes = Math.floor(milliseconds / 60000);
+    const seconds = Math.floor((milliseconds % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+  }
+
+  previousPage(): void {
+    this.tracksService.previousPage();
+  }
+
+  nextPage(): void {
+    this.tracksService.nextPage();
+  }
+
+  firstPage(): void {
+    this.tracksService.setCurrentPage(0);
+  }
+
+  lastPage(): void {
+    this.tracksService.setCurrentPage((this.pageResource.value()?.totalPages ?? 1) - 1);
+  }
 }
