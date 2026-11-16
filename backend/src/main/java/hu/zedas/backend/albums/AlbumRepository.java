@@ -1,9 +1,19 @@
 package hu.zedas.backend.albums;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AlbumRepository extends JpaRepository<AlbumEntity, Integer> {
-    public AlbumEntity getById(Integer albumId);
+    @Override
+    @EntityGraph(attributePaths = {"artist", "tracks", "tracks.genre", "tracks.mediaType"})
+    List<AlbumEntity> findAll();
+
+    @Override
+    @EntityGraph(attributePaths = {"artist", "tracks", "tracks.genre", "tracks.mediaType"})
+    Optional<AlbumEntity> findById(Integer albumId);
+
     List<AlbumEntity> findAllByOrderByTitleAsc();
 }

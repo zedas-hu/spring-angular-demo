@@ -5,18 +5,14 @@ import { Injectable, linkedSignal, resource, signal } from '@angular/core';
 export interface TrackRecord {
   trackId: number;
   name: string;
+  albumId: number;
   albumTitle: string | null;
-  artists: ArtistRecord[];
+  artistName: string | null;
   genreName: string | null;
   mediaTypeName: string | null;
   composer: string | null;
   milliseconds: number | null;
   unitPrice: number | null;
-}
-
-export interface ArtistRecord {
-  artistId: number;
-  name: string | null;
 }
 
 export interface PageResponse<T> {

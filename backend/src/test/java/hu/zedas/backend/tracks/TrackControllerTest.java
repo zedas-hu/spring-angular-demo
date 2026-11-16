@@ -1,23 +1,56 @@
 package hu.zedas.backend.tracks;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.mockito.Mockito;
 
 class TrackControllerTest {
+    private TrackRepository tracksRepository;
+    private TrackController trackController;
+
+    @BeforeEach
+    void setUp() {
+        tracksRepository = Mockito.mock(TrackRepository.class);
+        trackController = new TrackController(tracksRepository);
+    }
+
     @Test
-    void addsTrackIdAsStableTieBreaker() {
-        Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "name"));
+    void searchesTrackNameAlbumTitleAndArtistForFiltersWithAtLeastTwoCharacters() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(tracksRepository
+                .findByNameContainingIgnoreCaseOrAlbum_TitleContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(
+                        "balls", "balls", "balls", pageable)).thenReturn(Page.empty(pageable));
 
-        Pageable result = pageable;
+        trackController.getAllTracks("  balls  ", pageable);
 
-        assertEquals(Sort.Direction.DESC, result.getSort().getOrderFor("name").getDirection());
-        assertEquals(Sort.Direction.ASC, result.getSort().getOrderFor("trackId").getDirection());
+        verify(tracksRepository)
+                .findByNameContainingIgnoreCaseOrAlbum_TitleContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(
+                        "balls", "balls", "balls", pageable);
+        verify(tracksRepository, never()).findAll(pageable);
+    }
+
+    @Test
+    void ignoresFiltersShorterThanTwoCharacters() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(tracksRepository.findAll(pageable)).thenReturn(Page.empty(pageable));
+
+        trackController.getAllTracks("a", pageable);
+        trackController.getAllTracks(" ", pageable);
+        trackController.getAllTracks(null, pageable);
+
+        verify(tracksRepository, times(3)).findAll(pageable);
+        verify(tracksRepository, never())
+                .findByNameContainingIgnoreCaseOrAlbum_TitleContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(
+                        anyString(), anyString(), anyString(), eq(pageable));
     }
 }

@@ -1,0 +1,39 @@
+<div class="container">
+  @if (!selectedAlbumId()) {
+    <p role="alert">Invalid album ID.</p>
+  }
+  @else if (pageResource.error(); as error) {
+    <p role="alert">Could not load album: {{ errorMessage(error) }}</p>
+  }
+  @else if (pageResource.isLoading()) {
+    <p>Loading album...</p>
+  }
+  @else if (albumService.displayedPage(); as page) {
+    <div class="header">
+      <h1>{{ page.title }}</h1>
+      <h2>{{ page.artistName }}</h2>
+    </div>
+    <div class="tracks">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Genre</th>
+                    <th style="text-align: right;">◷</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (albumService.displayedPage(); as page) {
+                @for (track of page.tracks; track track.trackId) {
+                    <tr>
+                        <td class="name">{{ track.name }}</td>
+                        <td class="genre">{{ track.genreName }}</td>
+                        <td class="length">{{ convertToMinutes(track.milliseconds) }}</td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+  }
+</div>

@@ -58,9 +58,9 @@
                 @for (track of page.content; track track.trackId) {
                     <tr>
                         <td class="name">{{ track.name }}<br/>
-                            <span class="artists">{{ track.artists.map(artist => artist.name).join(', ') }}</span>
+                            <span class="artist">{{ track.artistName }}</span>
                         </td>
-                        <td class="album">{{ track.albumTitle }}</td>
+                        <td class="album textbutton" (click)="navigateToAlbum(track.albumId)">{{ track.albumTitle }}</td>
                         <td class="genre">{{ track.genreName }}</td>
                         <td class="length">{{ convertToMinutes(track.milliseconds) }}</td>
                     </tr>

@@ -4,6 +4,12 @@ div.container {
         grid-template-columns: 1fr max-content max-content;
         column-gap: 2rem;
         align-items: center;
+        margin-top: 0;
+        margin-bottom: 2rem;
+
+        h1 {
+            margin: 0;
+        }
 
         button.tool {
             cursor: pointer;
@@ -108,17 +114,17 @@ div.container {
                         padding: 0.5rem;
                         height: 3rem;
 
-                        span.artists {
+                        span.artist {
                             color: var(--sub-color);
                             font-size: 0.95rem;
                         }
 
                         &.album {
-                            font-size: 0.95rem;
+                            font-size: 1rem;
                         }
 
                         &.genre {
-                            font-size: 0.95rem;
+                            font-size: 1rem;
                         }
 
                         &.length {

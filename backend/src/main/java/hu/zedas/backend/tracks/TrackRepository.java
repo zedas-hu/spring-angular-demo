@@ -8,4 +8,8 @@ import org.springframework.data.jpa.repository.EntityGraph;
 public interface TrackRepository extends JpaRepository<TrackEntity, Integer> {
     @EntityGraph(attributePaths = {"album.artist", "mediaType", "genre"})
     Page<TrackEntity> findAll(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"album.artist", "mediaType", "genre"})
+    Page<TrackEntity> findByNameContainingIgnoreCaseOrAlbum_TitleContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(
+            String nameFilter, String albumTitleFilter, String artistNameFilter, Pageable pageable);
 }

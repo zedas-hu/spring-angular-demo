@@ -1,0 +1,70 @@
+div.container {
+    div.header {
+        h1 {
+            margin: 0;
+        }
+        h2 {
+            margin: 0;
+            color: var(--sub-color);
+        }
+        margin-top: 0;
+        margin-bottom: 2rem;
+    }
+
+    div.tracks {
+        height: 49rem;
+
+        table {
+            display: grid;
+            align-items: start;
+            grid-template-columns: 3fr 1fr 5rem;
+            row-gap: 0.5rem;
+
+            thead {
+                display: contents;
+                tr {
+                    display: contents;
+                    th {
+                        text-align: left;
+                        border-bottom: 1px solid var(--line-color);
+                        padding-bottom: 1rem;
+                        margin-bottom: 1rem;
+                        font-size: 85%;
+                        height: 1rem;
+                    }
+                }
+            }
+
+            tbody {
+                display: contents;
+                tr {
+                    display: contents;
+                    td {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        align-content: center;
+                        background-color: transparent;
+                        padding: 0.5rem;
+                        height: 2rem;
+
+                        &.genre {
+                            font-size: 1rem;
+                        }
+
+                        &.length {
+                            text-align: right;
+                            font-size: 1.2rem;
+                            font-family: Courier New, monospace;
+                            font-weight: bold;
+                        }
+                    }
+
+                    &:hover td {
+                        background-color: var(--row-hilight);
+                    }
+                }
+            }
+        }
+    }
+}

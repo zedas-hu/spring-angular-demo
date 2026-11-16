@@ -1,23 +1,19 @@
 package hu.zedas.backend.tracks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import hu.zedas.backend.albums.AlbumEntity;
 import hu.zedas.backend.artists.ArtistEntity;
-import hu.zedas.backend.artists.ArtistResponse;
 
 class TrackMapperTest {
     @Test
-    void mapsAlbumArtistAsArtistsArray() {
+    void mapsAlbumArtistAsArtistName() {
         ArtistEntity artist = mock(ArtistEntity.class);
-        when(artist.getArtistId()).thenReturn(7);
         when(artist.getName()).thenReturn("Artist");
 
         AlbumEntity album = mock(AlbumEntity.class);
@@ -30,15 +26,15 @@ class TrackMapperTest {
 
         TrackResponse response = TrackMapper.INSTANCE.toResponse(track);
 
-        assertEquals(List.of(new ArtistResponse(7, "Artist")), response.artists());
+        assertEquals("Artist", response.artistName());
     }
 
     @Test
-    void returnsEmptyArtistsArrayWhenTrackHasNoAlbum() {
+    void returnsNullArtistNameWhenTrackHasNoAlbum() {
         TrackEntity track = mock(TrackEntity.class);
 
         TrackResponse response = TrackMapper.INSTANCE.toResponse(track);
 
-        assertTrue(response.artists().isEmpty());
+        assertNull(response.artistName());
     }
 }

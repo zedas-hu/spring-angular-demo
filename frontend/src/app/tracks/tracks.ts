@@ -1,6 +1,6 @@
 import { Component, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TracksService, SortType, SortDirection } from './tracks.service';
 
 @Component({
@@ -11,6 +11,7 @@ import { TracksService, SortType, SortDirection } from './tracks.service';
 export class Tracks {
   private readonly tracksService = inject(TracksService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly routeParams = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
@@ -57,5 +58,11 @@ export class Tracks {
 
   setOrder(order: SortType, direction?: SortDirection): void {
     this.tracksService.setSort(order, direction ?? (this.tracksService.getDirection() === 'asc' ? 'desc' : 'asc'));
+  }
+
+  navigateToAlbum(albumId: number): void {
+    // Navigate to the album page using the router
+    // Assuming you have a router instance injected
+    this.router.navigate(['/album', albumId]);
   }
 }

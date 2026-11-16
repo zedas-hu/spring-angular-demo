@@ -1,9 +1,10 @@
 <main>
   <nav>
     @for (item of [
-      { title: 'Tracks', link: 'tracks' },
+      { title: 'Tracks', link: '/tracks' },
+      { title: 'Album', link: '/album' },
     ]; track item.title) {
-      <a [href]="item.link">{{ item.title }}</a>
+      <a [routerLink]="item.link">{{ item.title }}</a>
     }
   </nav>
   <div class="content">

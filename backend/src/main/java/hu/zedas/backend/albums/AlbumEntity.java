@@ -1,6 +1,10 @@
 package hu.zedas.backend.albums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import hu.zedas.backend.artists.ArtistEntity;
+import hu.zedas.backend.tracks.TrackEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,6 +13,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 
 // CREATE TABLE "albums"
 // (
@@ -32,6 +38,10 @@ public class AlbumEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ArtistId", nullable = false)
     private ArtistEntity artist;
+
+    @OneToMany(mappedBy = "album", fetch = FetchType.LAZY)
+    @OrderBy("trackId ASC")
+    private List<TrackEntity> tracks = new ArrayList<>();
 
     protected AlbumEntity() {
     }
@@ -58,5 +68,9 @@ public class AlbumEntity {
 
     public void setArtist(ArtistEntity artist) {
         this.artist = artist;
+    }
+
+    public List<TrackEntity> getTracks() {
+        return tracks;
     }
 }
