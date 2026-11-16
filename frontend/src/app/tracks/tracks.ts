@@ -1,4 +1,4 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, ViewChild, ElementRef } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TracksService, SortType, SortDirection } from './tracks.service';
@@ -48,6 +48,15 @@ export class Tracks {
     this.tracksService.nextPage();
   }
 
+  @ViewChild('searchInput')
+  set searchInput(input: ElementRef<HTMLInputElement> | undefined) {
+    input?.nativeElement.focus();
+  }
+
+  startSearch(): void {
+    this.tracksService.setFilter('');
+  }
+
   firstPage(): void {
     this.tracksService.setCurrentPage(0);
   }
@@ -61,8 +70,6 @@ export class Tracks {
   }
 
   navigateToAlbum(albumId: number): void {
-    // Navigate to the album page using the router
-    // Assuming you have a router instance injected
     this.router.navigate(['/album', albumId]);
   }
 }

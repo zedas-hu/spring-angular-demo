@@ -17,6 +17,7 @@ type FetchParams = {
 export class AlbumService {
   // private readonly http = inject(HttpClient);
   private readonly currentAlbum = signal<number | null>(null);
+  
   readonly pageData = resource<AlbumRecord, FetchParams>({
     params: () => {
       const albumId = this.currentAlbum();
@@ -35,6 +36,7 @@ export class AlbumService {
       return response.json();
     },
   });
+
   readonly displayedPage = linkedSignal<
     AlbumRecord | undefined,
     AlbumRecord | undefined

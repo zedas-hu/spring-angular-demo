@@ -8,7 +8,7 @@ div.container {
         margin-bottom: 2rem;
 
         h1 {
-            margin: 0;
+            margin: 0 0 0 0.5rem;
         }
 
         button.tool {
@@ -16,6 +16,20 @@ div.container {
             border: 0;
             background-color: transparent;
             font-size: 1.5rem;
+        }
+
+        div.filter {
+            input {
+                background: transparent;
+                border: 0;
+                text-align: right;
+                font-size: 1.5rem;
+
+                &:focus {
+                    background: transparent;
+                    outline: 0;
+                }
+            }
         }
 
         div.order {
@@ -101,7 +115,7 @@ div.container {
                 }
             }
 
-            tbody {
+            tbody, tfoot {
                 display: contents;
                 tr {
                     display: contents;

@@ -12,7 +12,7 @@ https://www.sqlitetutorial.net/sqlite-sample-database/
 
 ## Tracks nézet fül
 
-- Gépelős szűrés
+- Aktuális oldal az url-be?
 
 ## Album nézet fül
 
@@ -27,6 +27,10 @@ https://www.sqlitetutorial.net/sqlite-sample-database/
     - Idő szumma alul
     - Új track felvitele a lista végén
       - Meglévő track hozzáadása
+
+## Új album
+
+- Új album létrehozása
 
 ## Bejelentkezés
 

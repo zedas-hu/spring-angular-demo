@@ -1,7 +1,6 @@
 package hu.zedas.backend.albums;
 
-import java.util.List;
-
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -27,4 +26,10 @@ public interface AlbumMapper {
     default TrackResponse toTrackResponse(TrackEntity entity) {
         return TrackMapper.INSTANCE.toResponse(entity);
     }
+
+    @BeanMapping(ignoreUnmappedSourceProperties = "artistId")
+    @Mapping(target = "albumId", ignore = true)
+    @Mapping(target = "artist", ignore = true)
+    @Mapping(target = "tracks", ignore = true)
+    AlbumEntity toEntity(AlbumPostRequest request);
 }

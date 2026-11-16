@@ -3,7 +3,12 @@
         <h1>Tracks</h1>
         @if (tracksService.displayedPage()) {
             <div class="filter">
-                <button class="tool">Search 🔎︎</button>
+                @if (tracksService.getFilter() === undefined) {
+                    <button class="tool" (click)="startSearch()">Search 🔎︎</button>
+                } @else {
+                    <input #searchInput type="text" [value]="tracksService.getFilter()" (blur)="tracksService.getFilter() === '' &&tracksService.setFilter(undefined)" (input)="tracksService.setFilter($event.target.value)" />
+                    <button class="tool" (click)="tracksService.setFilter(undefined)">✖</button>
+                }
             </div>
 
             <div class="order">
@@ -13,6 +18,8 @@
                         [checked]="tracksService.getSort() === 'name'" />Name</label>
                     <label><input type="radio" name="order" value="album" (click)="tracksService.setSort('albumTitle')" 
                         [checked]="tracksService.getSort() === 'albumTitle'" />Album</label>
+                    <label><input type="radio" name="order" value="artist" (click)="tracksService.setSort('albumArtistName')" 
+                        [checked]="tracksService.getSort() === 'albumArtistName'" />Artist</label>
                     <label><input type="radio" name="order" value="genre" (click)="tracksService.setSort('genreName')" 
                         [checked]="tracksService.getSort() === 'genreName'" />Genre</label>
                     <label><input type="radio" name="order" value="composer" (click)="tracksService.setSort('composer')" 

@@ -15,6 +15,7 @@ h1, h2, h3, h4, h5, h6, body {
     --page-background: light-dark(white, black);
     --font-color: light-dark(black, white);
     --line-color: light-dark(grey, lime);
+    --line-color2: light-dark(grey, grey);
     --textbutton-color: light-dark(gray, #a5ffa5);
     --button-background: light-dark(#e0e0e0, #050);
     --button-hover: light-dark(#ededed, #008d00);

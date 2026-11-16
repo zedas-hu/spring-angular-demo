@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/api/tracks")
 public class TrackController {
     private static final Set<String> ALLOWED_SORT_PROPERTIES = Set.of(
-            "name", "composer", "milliseconds", "unitPrice", "albumTitle", "genreName", "mediaTypeName");
+            "name", "composer", "milliseconds", "unitPrice", "albumTitle", "genreName", "mediaTypeName", "albumArtistName");
 
     private final TrackRepository tracksRepository;
 

@@ -26,7 +26,7 @@ export interface PageResponse<T> {
   totalPages: number;
 }
 
-export type SortType = 'name' | 'albumTitle' | 'genreName' | 'mediaTypeName' | 'composer' | 'milliseconds';
+export type SortType = 'name' | 'albumTitle' | 'genreName' | 'mediaTypeName' | 'composer' | 'milliseconds' | 'albumArtistName';
 export type SortDirection = 'asc' | 'desc';
 
 @Injectable({ providedIn: 'root' })
@@ -36,6 +36,7 @@ export class TracksService {
   // private readonly http = inject(HttpClient);
   private readonly currentPage = signal(0);
   private readonly sort = signal<SortType>('name');
+  private readonly filter = signal<string | undefined>(undefined);
   private readonly direction = signal<SortDirection>('asc');
   // public readonly pageData = rxResource<PageResponse<TrackRecord>, ResourceParams>({
   //   params: () => ({
@@ -52,6 +53,7 @@ export class TracksService {
       page: String(this.currentPage()),
       size: String(TracksService.pageSize),
       sort: `${this.sort()},${this.direction()}`,
+      filter: this.filter() ?? '',
     }),
     loader: async ({ params, abortSignal }) => {
       const response = await fetch(`/api/tracks?${params}`, { signal: abortSignal });
@@ -85,6 +87,11 @@ export class TracksService {
     this.currentPage.set(0);
   }
 
+  setFilter(filter: string | undefined): void {
+    this.filter.set(filter);
+    this.currentPage.set(0);
+  }
+
   previousPage(): void {
     this.currentPage.update((page) => page > 0 ? page - 1 : 0);
   }
@@ -101,5 +108,9 @@ export class TracksService {
 
   getDirection(): SortDirection {
     return this.direction();
+  }
+
+  getFilter(): string | undefined {
+    return this.filter();
   }
 }

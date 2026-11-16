@@ -35,7 +35,7 @@ div.container {
                 }
             }
 
-            tbody {
+            tbody, tfoot {
                 display: contents;
                 tr {
                     display: contents;
@@ -64,6 +64,10 @@ div.container {
                         background-color: var(--row-hilight);
                     }
                 }
+            }
+
+            tfoot tr td {
+                border-top: 1px solid var(--line-color2);
             }
         }
     }
