@@ -4,31 +4,29 @@ Forrás adat:
 
 https://www.sqlitetutorial.net/sqlite-sample-database/
 
+## Fősáv
+
+- Tracks
+- New album
+- Login
+
 ## Tracks nézet fül
 
-- Menjen a track lapozás
++ Menjen a track lapozás
++ Menjen a rendezés
+  + Lenyíló, amiben van irány is
 - Menjen a track szűrés
-  - Albumra
-  - Műfajra
-  - Szerzőre
-  - Média típusra
-- Menjen a rendezés
-  - Albumra
-  - Műfajra
-  - Szerzőre
-  - Média típusra
-  - Árra
+  - Gépelős szűrés
 
 ## Album nézet fül
 
 - Egy album teljes nézete
   - Szerzők
+    - Új szerző hozzáadása
   - Track lista
-  - Idő szumma
-
-- Új album felvitele
-
-- Új track felvitele
+  - Idő szumma alul
+  - Új track felvitele a lista végén
+    - Meglévő track hozzáadása
 
 - Track szerkesztése
 

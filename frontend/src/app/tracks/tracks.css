@@ -1,36 +1,137 @@
 div.container {
-  display: grid;
-  grid-template-rows: 50rem 1rem;
-  align-content: initial;
-  align-items: start;
-
-    table {
+    div.header {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr 5rem;
-        gap: 0.5rem;
+        grid-template-columns: 1fr max-content max-content;
+        column-gap: 2rem;
+        align-items: center;
 
-        thead {
-            display: contents;
-            tr {
-                display: contents;
-                th {
-                    text-align: left;
-                    border-bottom: 1px solid var(--line-color);
-                    padding-bottom: 1rem;
+        button.tool {
+            cursor: pointer;
+            border: 0;
+            background-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        div.order {
+            button.tool {
+                anchor-name: --order-trigger;
+            }
+
+            div.order-inner {
+                position: fixed;
+                position-anchor: --order-trigger;
+                top: anchor(bottom);
+                right: anchor(right);
+                bottom: auto;
+                left: auto;
+                margin: 0;
+                padding: 0.5rem;
+                width: 8rem;
+                background-color: var(--button-background);
+                font-size: 75%;
+                color: var(--button-color);
+                border-radius: 0.25rem;
+                border: 0;
+
+                label {
+                    cursor: pointer;
+                    display: block;
                     margin-bottom: 1rem;
-                    font-size: 85%;
+
+                    &:first-of-type {
+                        margin-top: 0.5rem;
+                    }
+
+                    &:last-of-type {
+                        margin-top: 1.5rem;
+                    }
+
+                    input {
+                        appearance: none;
+                        position: relative;
+                        margin-left: 2rem;
+
+                        &:checked::before {
+                            content: "✓";
+                            color: var(--font-color);
+
+                            position: absolute;
+                            top: -1rem;
+                            left: -1.5rem;
+                        }
+                    }
                 }
             }
         }
+    }
 
-        tbody {
-            display: contents;
-            tr {
+    div.tracks {
+        height: 49rem;
+
+        table {
+            display: grid;
+            align-items: start;
+            grid-template-columns: 3fr 2fr 1fr 5rem;
+            row-gap: 0.5rem;
+
+            thead {
                 display: contents;
-                td {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
+                tr {
+                    display: contents;
+                    th {
+                        text-align: left;
+                        border-bottom: 1px solid var(--line-color);
+                        padding-bottom: 1rem;
+                        margin-bottom: 1rem;
+                        font-size: 85%;
+                        height: 1rem;
+
+                        span.direction {
+                            margin-left: 0.5rem;
+                            font-size: 0.85rem;
+                            color: var(--button-color);
+                        }
+                    }
+                }
+            }
+
+            tbody {
+                display: contents;
+                tr {
+                    display: contents;
+                    td {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        align-content: center;
+                        background-color: transparent;
+                        padding: 0.5rem;
+                        height: 3rem;
+
+                        span.artists {
+                            color: var(--sub-color);
+                            font-size: 0.95rem;
+                        }
+
+                        &.album {
+                            font-size: 0.95rem;
+                        }
+
+                        &.genre {
+                            font-size: 0.95rem;
+                        }
+
+                        &.length {
+                            text-align: right;
+                            font-size: 1.2rem;
+                            font-family: Courier New, monospace;
+                            font-weight: bold;
+                        }
+                    }
+
+                    &:hover td {
+                        background-color: var(--row-hilight);
+                    }
                 }
             }
         }
@@ -46,13 +147,18 @@ div.container {
         padding-top: 1rem;
 
         button.mover {
-            font-family: Arial;
+            text-box: trim-both cap alphabetic;
+            cursor: pointer;
             font-size: 1.25rem;
-            padding: 0.5rem;
+            padding: 1rem;
             color: var(--button-color);
             background-color: var(--button-background);
             border: 0;
             border-radius: 0.25rem;
+
+            &:hover {
+                background-color: var(--button-hover);
+            }
 
             &:disabled {
                 background-color: var(--button-disabled-background);

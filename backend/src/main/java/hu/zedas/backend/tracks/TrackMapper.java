@@ -1,5 +1,9 @@
 package hu.zedas.backend.tracks;
 
+import java.util.List;
+
+import hu.zedas.backend.artists.ArtistEntity;
+import hu.zedas.backend.artists.ArtistResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -15,9 +19,16 @@ public interface TrackMapper {
 
     @Mapping(target = "albumId", source = "album.albumId")
     @Mapping(target = "albumTitle", source = "album.title")
+    @Mapping(target = "artists", source = "album.artist")
     @Mapping(target = "genreId", source = "genre.genreId")
     @Mapping(target = "genreName", source = "genre.name")
     @Mapping(target = "mediaTypeId", source = "mediaType.mediaTypeId")
     @Mapping(target = "mediaTypeName", source = "mediaType.name")
     TrackResponse toResponse(TrackEntity entity);
+
+    default List<ArtistResponse> toArtistResponses(ArtistEntity artist) {
+        return artist == null
+            ? List.of()
+            : List.of(new ArtistResponse(artist.getArtistId(), artist.getName()));
+    }
 }

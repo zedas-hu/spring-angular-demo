@@ -1,16 +1,22 @@
 // import { HttpClient } from '@angular/common/http';
-import { Injectable, resource, signal } from '@angular/core';
+import { Injectable, linkedSignal, resource, signal } from '@angular/core';
 // import { rxResource } from '@angular/core/rxjs-interop';
 
 export interface TrackRecord {
   trackId: number;
   name: string;
   albumTitle: string | null;
+  artists: ArtistRecord[];
   genreName: string | null;
   mediaTypeName: string | null;
   composer: string | null;
   milliseconds: number | null;
   unitPrice: number | null;
+}
+
+export interface ArtistRecord {
+  artistId: number;
+  name: string | null;
 }
 
 export interface PageResponse<T> {
@@ -29,7 +35,7 @@ export type SortDirection = 'asc' | 'desc';
 
 @Injectable({ providedIn: 'root' })
 export class TracksService {
-  static readonly pageSize = 20;
+  static readonly pageSize = 10;
 
   // private readonly http = inject(HttpClient);
   private readonly currentPage = signal(0);
@@ -60,6 +66,13 @@ export class TracksService {
       return response.json();
     },
   });
+  readonly displayedPage = linkedSignal<
+    PageResponse<TrackRecord> | undefined,
+    PageResponse<TrackRecord> | undefined
+  >({
+    source: () => this.pageData.value(),
+    computation: (page, previous) => page ?? previous?.value,
+  });
 
   setCurrentPage(page: number): void {
     this.currentPage.set(Math.max(0, page));
@@ -84,5 +97,13 @@ export class TracksService {
     if (!this.pageData.isLoading() && this.pageData.hasValue() && !this.pageData.value().last) {
       this.currentPage.update((page) => page + 1);
     }
+  }
+
+  getSort(): SortType {
+    return this.sort();
+  }
+
+  getDirection(): SortDirection {
+    return this.direction();
   }
 }

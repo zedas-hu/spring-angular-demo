@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 
 public interface TrackRepository extends JpaRepository<TrackEntity, Integer> {
-    @EntityGraph(attributePaths = {"album", "mediaType", "genre"})
+    @EntityGraph(attributePaths = {"album.artist", "mediaType", "genre"})
     Page<TrackEntity> findAll(Pageable pageable);
 }

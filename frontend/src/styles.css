@@ -1,18 +1,36 @@
 /* You can add global styles to this file, and also import other style files */
 body {
     font-family: Verdana, Geneva, sans-serif;
-    font-size: 22px;
+    font-size: 18pt;
     background-color: var(--page-background);
     color: var(--font-color);
+}
+
+h1, h2, h3, h4, h5, h6, body {
+    font-family: Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif;
+    font-weight: normal;
 }
 
 :root {
     --page-background: light-dark(white, black);
     --font-color: light-dark(black, white);
     --line-color: light-dark(grey, lime);
+    --textbutton-color: light-dark(gray, #a5ffa5);
     --button-background: light-dark(#e0e0e0, #050);
+    --button-hover: light-dark(#ededed, #008d00);
     --button-color: light-dark(black, lime);
     --button-disabled-background: light-dark(lightgray, #030);
     --button-disabled-color: light-dark(gray, black);
     --data-color: light-dark(white, #a5ffa5);
+    --sub-color: light-dark(gray, #a5ffa5);
+    --row-hilight: light-dark(#dbe8ff, #0e385e);
+}
+
+.textbutton {
+    cursor: pointer;
+    user-select: none;
+    &:hover {
+        color: var(--textbutton-color);
+        text-decoration: underline;
+    }
 }

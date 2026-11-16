@@ -29,7 +29,7 @@ export class Tracks {
   readonly pageResource = this.tracksService.pageData;
 
   convertToMinutes(milliseconds: number | null): string {
-    if (milliseconds === null) return '';
+    if (!milliseconds) return '';
     const minutes = Math.floor(milliseconds / 60000);
     const seconds = Math.floor((milliseconds % 60000) / 1000);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -52,6 +52,10 @@ export class Tracks {
   }
 
   lastPage(): void {
-    this.tracksService.setCurrentPage((this.pageResource.value()?.totalPages ?? 1) - 1);
+    this.tracksService.setCurrentPage((this.tracksService.displayedPage()?.totalPages ?? 1) - 1);
+  }
+
+  setOrder(order: SortType, direction?: SortDirection): void {
+    this.tracksService.setSort(order, direction ?? (this.tracksService.getDirection() === 'asc' ? 'desc' : 'asc'));
   }
 }
