@@ -31,6 +31,10 @@ https://www.sqlitetutorial.net/sqlite-sample-database/
 ## Új album
 
 - Új album létrehozása
+  - Title
+    - A szerverről visszatérő hibát 
+  - Meglévő artist beírása, vagy új kiválasztása
+  - Új artist
 
 ## Bejelentkezés
 

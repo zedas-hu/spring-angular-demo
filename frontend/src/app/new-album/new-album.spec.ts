@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { routes } from '../app.routes';
-import { AlbumSelection } from './new-album';
+import { NewAlbumComponent } from './new-album';
 
-describe('AlbumSelection', () => {
-  let fixture: ComponentFixture<AlbumSelection>;
+describe('NewAlbumComponent', () => {
+  let fixture: ComponentFixture<NewAlbumComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AlbumSelection],
+      imports: [NewAlbumComponent],
       providers: [provideRouter(routes)],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AlbumSelection);
+    fixture = TestBed.createComponent(NewAlbumComponent);
   });
 
   it('links back to tracks', () => {

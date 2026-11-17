@@ -1,4 +1,4 @@
-<div class="container">
+<main>
   @if (!selectedAlbumId()) {
     <p role="alert">Invalid album ID.</p>
   }
@@ -9,11 +9,19 @@
     <p>Loading album...</p>
   }
   @else if (albumService.displayedPage(); as page) {
-    <div class="header">
-      <h1>{{ page.title }}</h1>
+    <header>
+      <h1>♪ {{ page.title }}</h1>
+
+      <div class="back">
+        <a class="text-button" [routerLink]="['/tracks']">Back</a>
+      </div>
+    </header>
+    
+    <header class="sub-header">
       <h2>{{ page.artistName }}</h2>
-    </div>
-    <div class="tracks">
+    </header>
+
+    <content>
         <table>
             <thead>
                 <tr>
@@ -43,6 +51,6 @@
                 </tr>
             </tfoot>
         </table>
-    </div>
+    </content>
   }
-</div>
+</main>

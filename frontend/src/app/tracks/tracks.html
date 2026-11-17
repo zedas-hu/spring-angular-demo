@@ -1,10 +1,10 @@
-<div class="container">
-    <div class="header">
-        <h1>Tracks</h1>
+<main>
+    <header>
+        <h1>၊၊||၊ Tracks</h1>
         @if (tracksService.displayedPage()) {
             <div class="filter">
                 @if (tracksService.getFilter() === undefined) {
-                    <button class="tool" (click)="startSearch()">Search 🔎︎</button>
+                    <button class="tool text-button" (click)="startSearch()">Search 🔎︎</button>
                 } @else {
                     <input #searchInput type="text" [value]="tracksService.getFilter()" (blur)="tracksService.getFilter() === '' &&tracksService.setFilter(undefined)" (input)="tracksService.setFilter($event.target.value)" />
                     <button class="tool" (click)="tracksService.setFilter(undefined)">✖</button>
@@ -12,8 +12,8 @@
             </div>
 
             <div class="order">
-                <button class="tool textbutton" popovertarget="orderpopover">Order ⇅</button>
-                <div class="order-inner" id="orderpopover" popover>
+                <button class="tool text-button" popovertarget="orderpopover">Order ⇅</button>
+                <div class="order-inner popup-box" id="orderpopover" popover>
                     <label><input type="radio" name="order" value="name" (click)="tracksService.setSort('name')" 
                         [checked]="tracksService.getSort() === 'name'" />Name</label>
                     <label><input type="radio" name="order" value="album" (click)="tracksService.setSort('albumTitle')" 
@@ -30,23 +30,32 @@
                         [checked]="tracksService.getDirection() === 'asc'" />Ascending</label>
                 </div>
             </div>
-        }
-    </div>
 
-    <div class="tracks">
+            <div class="new">
+                <button class="tool text-button" popovertarget="newpopover">New +</button>
+                <div class="new-inner popup-box" id="newpopover" popover>
+                    <label>
+                        <a class="tool" (click)="showNewAlbumDialog()">Album</a>
+                    </label>
+                </div>
+            </div>
+        }
+    </header>
+
+    <content>
         <table>
             <thead>
                 <tr>
                     <th>
-                        <span class="title textbutton" (click)="setOrder('name')">Name</span>
+                        <span class="title text-button" (click)="setOrder('name')">Name</span>
                         <span class="direction">@if (tracksService.getSort() === 'name' && tracksService.getDirection() === 'asc') {⏷} @else if (tracksService.getSort() === 'name' && tracksService.getDirection() === 'desc') {⏶}</span>
                     </th>
                     <th>
-                        <span class="title textbutton" (click)="setOrder('albumTitle')">Album</span>
+                        <span class="title text-button" (click)="setOrder('albumTitle')">Album</span>
                         <span class="direction">@if (tracksService.getSort() === 'albumTitle' && tracksService.getDirection() === 'asc') {⏷} @else if (tracksService.getSort() === 'albumTitle' && tracksService.getDirection() === 'desc') {⏶}</span>
                     </th>
                     <th>
-                        <span class="title textbutton" (click)="setOrder('genreName')">Genre</span>
+                        <span class="title text-button" (click)="setOrder('genreName')">Genre</span>
                         <span class="direction">@if (tracksService.getSort() === 'genreName' && tracksService.getDirection() === 'asc') {⏷} @else if (tracksService.getSort() === 'genreName' && tracksService.getDirection() === 'desc') {⏶}</span>
                     </th>
                     <th style="text-align: right;">◷</th>
@@ -67,7 +76,7 @@
                         <td class="name">{{ track.name }}<br/>
                             <span class="artist">{{ track.artistName }}</span>
                         </td>
-                        <td class="album textbutton" (click)="navigateToAlbum(track.albumId)">{{ track.albumTitle }}</td>
+                        <td class="album text-button" (click)="navigateToAlbum(track.albumId)">{{ track.albumTitle }}</td>
                         <td class="genre">{{ track.genreName }}</td>
                         <td class="length">{{ convertToMinutes(track.milliseconds) }}</td>
                     </tr>
@@ -75,9 +84,9 @@
             }
             </tbody>
         </table>
-    </div>
+    </content>
 
-    <div class="pager">
+    <footer>
     @if (tracksService.displayedPage(); as page) {
         <button class="mover" (click)="firstPage()" [disabled]="page.first">❮❮</button>
         <button class="mover" (click)="previousPage()" [disabled]="page.first">❮</button>
@@ -85,5 +94,5 @@
         <button class="mover" (click)="nextPage()" [disabled]="page.last">❯</button>
         <button class="mover" (click)="lastPage()" [disabled]="page.last">❯❯</button>
     }
-    </div>
-</div>
+    </footer>
+</main>

@@ -1,12 +1,14 @@
 import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { formatDuration } from '../tools';
 import { AlbumService } from './album.service';
 
 @Component({
   selector: 'app-album',
   styleUrls: ['./album.css'],
   templateUrl: './album.html',
+  imports: [RouterLink],
 })
 export class Album {
   private readonly albumService = inject(AlbumService);
@@ -21,6 +23,8 @@ export class Album {
     const albumId = Number(value);
     return Number.isInteger(albumId) && albumId > 0 ? albumId : null;
   });
+  readonly pageResource = this.albumService.pageData;
+  readonly convertToMinutes = formatDuration;
 
   constructor() {
     this.syncAlbum();
@@ -29,15 +33,6 @@ export class Album {
 
   private syncAlbum(): void {
     this.albumService.setCurrentAlbum(this.selectedAlbumId());
-  }
-
-  readonly pageResource = this.albumService.pageData;
-
-  convertToMinutes(milliseconds: number | null): string {
-    if (!milliseconds) return '';
-    const minutes = Math.floor(milliseconds / 60000);
-    const seconds = Math.floor((milliseconds % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
 
   errorMessage(error: unknown): string {

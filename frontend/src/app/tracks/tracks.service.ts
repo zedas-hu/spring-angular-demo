@@ -110,6 +110,10 @@ export class TracksService {
     return this.direction();
   }
 
+  getCurrentPage(): number {
+    return this.currentPage();
+  }
+
   getFilter(): string | undefined {
     return this.filter();
   }

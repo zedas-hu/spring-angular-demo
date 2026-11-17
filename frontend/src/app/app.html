@@ -1,14 +1,1 @@
-<main>
-  <nav>
-    💿
-    @for (item of [
-      { title: 'Tracks', link: '/tracks' },
-      { title: 'Album', link: '/album' },
-    ]; track item.title) {
-      <a [routerLink]="item.link">{{ item.title }}</a>
-    }
-  </nav>
-  <div class="content">
-    <router-outlet />
-  </div>
-</main>
+<router-outlet />

@@ -1,3 +1,13 @@
-<div class="container">
-  <p>Please <a [routerLink]="['/tracks']">select an album</a> to view its details.</p>
-</div>
+<dialog #dialog class="dialog-box" id="new-album-dialog">
+  <header><h1>New album</h1></header>
+  
+  <content>
+    
+  </content>
+
+  <footer>
+    <button type="button" commandfor="new-album-dialog" command="close" class="text-button">
+      Close
+    </button>
+  </footer>
+</dialog>

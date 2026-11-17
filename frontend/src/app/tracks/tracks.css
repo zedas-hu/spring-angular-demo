@@ -1,11 +1,12 @@
-div.container {
-    div.header {
+main {
+    header {
         display: grid;
-        grid-template-columns: 1fr max-content max-content;
+        grid-template-columns: 1fr max-content max-content max-content;
         column-gap: 2rem;
         align-items: center;
         margin-top: 0;
         margin-bottom: 2rem;
+        align-items: baseline;
 
         h1 {
             margin: 0 0 0 0.5rem;
@@ -22,12 +23,29 @@ div.container {
             input {
                 background: transparent;
                 border: 0;
-                text-align: right;
                 font-size: 1.5rem;
+                text-align: right;
 
                 &:focus {
                     background: transparent;
                     outline: 0;
+                }
+            }
+        }
+
+        div.new {
+            button.tool {
+                anchor-name: --new-trigger;
+            }
+
+            div.new-inner {
+                position-anchor: --new-trigger;
+
+                label {
+                    cursor: pointer;
+                    display: block;
+                    text-align: center;
+                    margin:0.5rem;
                 }
             }
         }
@@ -38,20 +56,7 @@ div.container {
             }
 
             div.order-inner {
-                position: fixed;
                 position-anchor: --order-trigger;
-                top: anchor(bottom);
-                right: anchor(right);
-                bottom: auto;
-                left: auto;
-                margin: 0;
-                padding: 0.5rem;
-                width: 8rem;
-                background-color: var(--button-background);
-                font-size: 75%;
-                color: var(--button-color);
-                border-radius: 0.25rem;
-                border: 0;
 
                 label {
                     cursor: pointer;
@@ -85,7 +90,7 @@ div.container {
         }
     }
 
-    div.tracks {
+    content {
         height: 49rem;
 
         table {
@@ -157,7 +162,7 @@ div.container {
         }
     }
 
-    div.pager {
+    footer {
         display: grid;
         grid-template-columns: 3rem 3rem 1fr 3rem 3rem;
         gap: 0.5rem;

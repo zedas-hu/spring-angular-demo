@@ -1,17 +1,30 @@
-div.container {
-    div.header {
+main {
+    header {
+        display: grid;
+        grid-template-columns: 1fr max-content;
+        column-gap: 2rem;
+        align-items: center;
+        margin-top: 0;
+        align-items: baseline;
+
         h1 {
             margin: 0;
         }
+
+        div.back {
+            text-align: right;
+        }
+    }
+    header.sub-header {
+        margin-bottom: 2rem;
+
         h2 {
             margin: 0;
             color: var(--sub-color);
         }
-        margin-top: 0;
-        margin-bottom: 2rem;
     }
 
-    div.tracks {
+    content {
         height: 49rem;
 
         table {

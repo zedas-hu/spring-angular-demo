@@ -9,6 +9,8 @@ body {
 h1, h2, h3, h4, h5, h6, body {
     font-family: Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif;
     font-weight: normal;
+    margin: 0.5rem;
+    padding: 0;
 }
 
 :root {
@@ -16,7 +18,7 @@ h1, h2, h3, h4, h5, h6, body {
     --font-color: light-dark(black, white);
     --line-color: light-dark(grey, lime);
     --line-color2: light-dark(grey, grey);
-    --textbutton-color: light-dark(gray, #a5ffa5);
+    --text-button-color: light-dark(gray, #a5ffa5);
     --button-background: light-dark(#e0e0e0, #050);
     --button-hover: light-dark(#ededed, #008d00);
     --button-color: light-dark(black, lime);
@@ -27,11 +29,68 @@ h1, h2, h3, h4, h5, h6, body {
     --row-hilight: light-dark(#dbe8ff, #0e385e);
 }
 
-.textbutton {
+.text-button {
     cursor: pointer;
     user-select: none;
+    color: var(--font-color);
+    text-decoration: none;
+
     &:hover {
-        color: var(--textbutton-color);
+        color: var(--text-button-color);
         text-decoration: underline;
     }
+}
+
+.popup-box {
+    position: fixed;
+    top: anchor(bottom);
+    right: anchor(right);
+    bottom: auto;
+    left: auto;
+    margin: 0;
+    padding: 0.5rem;
+    width: 8rem;
+    background-color: var(--button-background);
+    font-size: 75%;
+    color: var(--button-color);
+    border-radius: 0.25rem;
+    border: 0;
+}
+
+.dialog-box {
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  max-height: 90dvh;
+  overflow: auto;
+  display: none;
+  grid-template-rows: min-content 1fr min-content;
+  grid-template-columns: 1fr;
+  row-gap: 1rem;
+
+  &::backdrop {
+    background: rgb(0 0 0 / 50%);
+    backdrop-filter: blur(3px);
+  }
+
+  &[open] {
+    display: grid;
+    animation: dialog-in 180ms ease-out;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open] {
+    animation: none;
+  }
 }

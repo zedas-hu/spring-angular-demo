@@ -33,13 +33,17 @@ public class AlbumController {
 
     @GetMapping("/{id}")
     public AlbumResponse getAlbumById(@PathVariable Integer id) {
-        return AlbumMapper.INSTANCE.toResponse(albumRepository.findById(id).orElseThrow());
+        return AlbumMapper.INSTANCE.toResponse(albumRepository.findById(id).orElseThrow(
+            () -> new IllegalArgumentException("Album not found")));
     }
 
     @PostMapping
     public ResponseEntity<AlbumResponse> createAlbum(@Valid @RequestBody AlbumPostRequest request) {
         AlbumEntity entity = AlbumMapper.INSTANCE.toEntity(request);
-        ArtistEntity artist = artistRepository.findById(request.getArtistId()).orElseThrow();
+        ArtistEntity artist = artistRepository.findById(request.getArtistId()).orElseThrow(
+            () -> new IllegalArgumentException("Artist not found"));
+        if (this.albumRepository.findByTitle(request.getTitle()).isPresent())
+            throw new IllegalArgumentException("Album with the same title already exists");
         entity.setArtist(artist);
         entity = albumRepository.save(entity);
         URI location = URI.create("/api/albums/" + entity.getAlbumId());

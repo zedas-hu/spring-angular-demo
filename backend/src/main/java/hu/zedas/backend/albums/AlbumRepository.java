@@ -16,4 +16,6 @@ public interface AlbumRepository extends JpaRepository<AlbumEntity, Integer> {
     Optional<AlbumEntity> findById(Integer albumId);
 
     List<AlbumEntity> findAllByOrderByTitleAsc();
+
+    Optional<AlbumEntity> findByTitle(String title);
 }
