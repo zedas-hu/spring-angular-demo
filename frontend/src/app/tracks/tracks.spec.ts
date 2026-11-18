@@ -1,8 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { provideRouter, Router } from '@angular/router';
 import { Tracks } from './tracks';
 import { PageResponse, TrackRecord, TracksService } from './tracks.service';
+import { NewAlbumComponent } from '../new-album/new-album';
 
 describe('Tracks', () => {
   let component: Tracks;
@@ -102,7 +104,26 @@ describe('Tracks', () => {
     const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     component.navigateToAlbum(42);
 
-    expect(navigate).toHaveBeenCalledWith(['/album', 42]);
+    expect(navigate).toHaveBeenCalledWith(['/albums', 42]);
+  });
+
+  it('closes the new album dialog and opens the created album', async () => {
+    await fixture.whenStable();
+
+    // The test DOM does not implement showModal; open the dialog as a plain attribute instead.
+    const showModal = HTMLDialogElement.prototype.showModal;
+    HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
+    try {
+      const router = TestBed.inject(Router);
+      const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+      component.showNewAlbumDialog();
+      fixture.debugElement.query(By.directive(NewAlbumComponent)).componentInstance.created.emit(7);
+
+      expect(navigate).toHaveBeenCalledWith(['/albums', 7]);
+      expect(fixture.nativeElement.querySelector('app-new-album')).toBeNull();
+    } finally {
+      HTMLDialogElement.prototype.showModal = showModal;
+    }
   });
 
   it('creates the new album dialog on demand and opens it', () => {

@@ -1,60 +1,57 @@
 /* You can add global styles to this file, and also import other style files */
 body {
-    font-family: Verdana, Geneva, sans-serif;
-    font-size: 18pt;
-    background-color: var(--page-background);
-    color: var(--font-color);
+  font-family: Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif;
+  font-weight: normal;
+  font-size: 18pt;
+  background-color: var(--page-background);
+  color: var(--font-color);
+  margin: 0;
 }
 
-h1, h2, h3, h4, h5, h6, body {
-    font-family: Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif;
-    font-weight: normal;
-    margin: 0.5rem;
-    padding: 0;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif;
+  font-weight: normal;
+  margin: 0.5rem;
+  padding: 0;
 }
 
 :root {
-    --page-background: light-dark(white, black);
-    --font-color: light-dark(black, white);
-    --line-color: light-dark(grey, lime);
-    --line-color2: light-dark(grey, grey);
-    --text-button-color: light-dark(gray, #a5ffa5);
-    --button-background: light-dark(#e0e0e0, #050);
-    --button-hover: light-dark(#ededed, #008d00);
-    --button-color: light-dark(black, lime);
-    --button-disabled-background: light-dark(lightgray, #030);
-    --button-disabled-color: light-dark(gray, black);
-    --data-color: light-dark(white, #a5ffa5);
-    --sub-color: light-dark(gray, #a5ffa5);
-    --row-hilight: light-dark(#dbe8ff, #0e385e);
+  --page-background: light-dark(white, black);
+  --font-color: light-dark(black, white);
+  --line-color: light-dark(orange, lime);
+  --line-color2: light-dark(grey, grey);
+  --text-button-active: light-dark(gray, #a5ffa5);
+  --text-button-color: light-dark(black, white);
+  --button-background: light-dark(#e9dfce, #050);
+  --button-hover: light-dark(#ededed, #008d00);
+  --button-color: light-dark(#e08e25, lime);
+  --button-disabled-background: light-dark(#ededed, #030);
+  --button-disabled-color: light-dark(lightgray, black);
+  --data-color: light-dark(white, #a5ffa5);
+  --sub-color: light-dark(#3689ba, #a5ffa5);
+  --row-hilight: light-dark(#dbe8ff, #0e385e);
+  --nav-background: light-dark(#dbe8ff, #0e385e);
+  --nav-color: light-dark(black, #e6f4ff);
+  --popup-background: light-dark(#e9dfce, #050);
+  --popup-color: light-dark(black, lime);
+  --popup-hover: light-dark(grey, white);
 }
 
 .text-button {
-    cursor: pointer;
-    user-select: none;
-    color: var(--font-color);
-    text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-button-color);
+  text-decoration: none;
 
-    &:hover {
-        color: var(--text-button-color);
-        text-decoration: underline;
-    }
-}
-
-.popup-box {
-    position: fixed;
-    top: anchor(bottom);
-    right: anchor(right);
-    bottom: auto;
-    left: auto;
-    margin: 0;
-    padding: 0.5rem;
-    width: 8rem;
-    background-color: var(--button-background);
-    font-size: 75%;
-    color: var(--button-color);
-    border-radius: 0.25rem;
-    border: 0;
+  &:hover {
+    color: var(--text-button-active);
+    text-decoration: underline;
+  }
 }
 
 .dialog-box {
@@ -93,4 +90,39 @@ h1, h2, h3, h4, h5, h6, body {
   .dialog[open] {
     animation: none;
   }
+}
+
+div.popup-box div.inner {
+  position: fixed;
+  top: anchor(bottom);
+  right: anchor(right);
+  bottom: auto;
+  left: auto;
+  margin: 0;
+  padding: 0.5rem;
+  width: max-content;
+  background-color: var(--popup-background);
+  font-size: 75%;
+  color: var(--popup-color);
+  border-radius: 0.25rem;
+  border: 0;
+
+  label {
+    cursor: pointer;
+    display: block;
+    text-align: center;
+    margin: 0.5rem;
+    
+    &:hover {
+      color: var(--popup-hover);
+      text-decoration: underline;
+    }
+  }
+}
+
+button.tool {
+  cursor: pointer;
+  border: 0;
+  background-color: transparent;
+  font-size: 1.5rem;
 }

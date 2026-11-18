@@ -46,6 +46,11 @@ public class AlbumEntity {
     protected AlbumEntity() {
     }
 
+    public AlbumEntity(String title, ArtistEntity artist) {
+        this.title = title;
+        this.artist = artist;
+    }
+
     public Integer getAlbumId() {
         return albumId;
     }

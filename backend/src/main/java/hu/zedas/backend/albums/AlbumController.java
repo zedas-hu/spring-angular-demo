@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
 import hu.zedas.backend.artists.ArtistEntity;
 import hu.zedas.backend.artists.ArtistRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @RestController
@@ -38,18 +39,20 @@ public class AlbumController {
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<AlbumResponse> createAlbum(@Valid @RequestBody AlbumPostRequest request) {
-        AlbumEntity entity = AlbumMapper.INSTANCE.toEntity(request);
-        ArtistEntity artist = artistRepository.findById(request.getArtistId()).orElseThrow(
-            () -> new IllegalArgumentException("Artist not found"));
-        if (this.albumRepository.findByTitle(request.getTitle()).isPresent())
-            throw new IllegalArgumentException("Album with the same title already exists");
-        entity.setArtist(artist);
-        entity = albumRepository.save(entity);
-        URI location = URI.create("/api/albums/" + entity.getAlbumId());
+        if (albumRepository.findByTitle(request.getTitle()).isPresent())
+            throw new BusinessValidationException("title", "TITLE_DUPLICATION");
+        ArtistEntity artist = artistRepository.findFirstByName(request.getArtistName())
+                .orElseGet(() -> artistRepository.save(new ArtistEntity(request.getArtistName())));
+        AlbumEntity album = new AlbumEntity(request.getTitle(), artist);
+        // AlbumEntity entity = AlbumMapper.INSTANCE.toEntity(request);
+        // entity.setArtist(artist);
+        album = albumRepository.save(album);
+        URI location = URI.create("/api/albums/" + album.getAlbumId());
 
         return ResponseEntity.created(location)
-                .body(AlbumMapper.INSTANCE.toResponse(entity));
+                .body(AlbumMapper.INSTANCE.toResponse(album));
     }
     
 }

@@ -1,1 +1,24 @@
-<router-outlet />
+<main>
+    <nav>
+        <h1>Chinook DB Demo</h1>
+        <app-popup class="language" [text]="t('LANGUAGE') + ' 🌏︎'">
+            <label>
+                <a class="tool" (click)="setLanguage('hu')">{{ t('LANG_HU') }}</a>
+            </label>
+            <label>
+                <a class="tool" (click)="setLanguage('en')">{{ t('LANG_EN') }}</a>
+            </label>
+        </app-popup>
+        <app-popup class="theme" [text]="t('THEME') + ' ◓'">
+            <label>
+                <a class="tool" (click)="setTheme('light')">{{ t('THEME_LIGHT') }}</a>
+            </label>
+            <label>
+                <a class="tool" (click)="setTheme('dark')">{{ t('THEME_DARK') }}</a>
+            </label>
+        </app-popup>
+    </nav>
+    <content>
+        <router-outlet />
+    </content>
+</main>

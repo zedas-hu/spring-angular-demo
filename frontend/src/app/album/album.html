@@ -1,19 +1,19 @@
 <main>
   @if (!selectedAlbumId()) {
-    <p role="alert">Invalid album ID.</p>
+    <p role="alert">{{ t('INVALID_ALBUM_ID') }}</p>
   }
   @else if (pageResource.error(); as error) {
-    <p role="alert">Could not load album: {{ errorMessage(error) }}</p>
+    <p role="alert">{{ t('LOAD_ALBUM_FAILED') }} {{ errorMessage(error) }}</p>
   }
   @else if (pageResource.isLoading()) {
-    <p>Loading album...</p>
+    <p>{{ t('LOADING_ALBUM') }}</p>
   }
   @else if (albumService.displayedPage(); as page) {
     <header>
       <h1>♪ {{ page.title }}</h1>
 
       <div class="back">
-        <a class="text-button" [routerLink]="['/tracks']">Back</a>
+        <a class="text-button" [routerLink]="['/tracks']">{{ t('BACK') }}</a>
       </div>
     </header>
     
@@ -25,8 +25,8 @@
         <table>
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Genre</th>
+                    <th>{{ t('NAME') }}</th>
+                    <th>{{ t('GENRE') }}</th>
                     <th style="text-align: right;">◷</th>
                 </tr>
             </thead>

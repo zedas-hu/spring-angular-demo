@@ -6,6 +6,7 @@ main {
         align-items: center;
         margin-top: 0;
         align-items: baseline;
+        padding: 0 0.5rem;
 
         h1 {
             margin: 0;
@@ -32,6 +33,7 @@ main {
             align-items: start;
             grid-template-columns: 3fr 1fr 5rem;
             row-gap: 0.5rem;
+            padding: 0 0.5rem;
 
             thead {
                 display: contents;

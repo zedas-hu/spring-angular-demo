@@ -1,13 +1,42 @@
 <dialog #dialog class="dialog-box" id="new-album-dialog">
   <header><h1>New album</h1></header>
   
-  <content>
-    
-  </content>
+  <form [formRoot]="albumForm">
+    <content>
+      <label for="album-title">Album Title</label><br/>
+      <input
+        id="album-title"
+        type="text"
+        [formField]="albumForm.title"
+        [attr.aria-invalid]="albumForm.title().touched() && albumForm.title().invalid()"
+      ><br/>
+      @if (albumForm.title().touched()) {
+        @for (error of albumForm.title().errors(); track $index) {
+          <p class="field-error" role="alert">{{ t(error.message!) }}</p>
+        }
+      }
 
-  <footer>
-    <button type="button" commandfor="new-album-dialog" command="close" class="text-button">
-      Close
-    </button>
-  </footer>
+      <label for="album-artist">Artist</label><br/>
+      <input
+        id="album-artist"
+        type="text"
+        [formField]="albumForm.artistName"
+        [attr.aria-invalid]="albumForm.artistName().touched() && albumForm.artistName().invalid()"
+      >
+      @if (albumForm.artistName().touched()) {
+        @for (error of albumForm.artistName().errors(); track $index) {
+          <p class="field-error" role="alert">{{ t(error.message!) }}</p>
+        }
+      }
+      
+      @if (formError(); as message) {
+        <p class="field-error" role="alert">{{ t(message) }}</p>
+      }
+    </content>
+
+    <footer>
+      <button type="submit" class="tool text-button">Create</button>
+      <button type="button" class="tool text-button" commandfor="new-album-dialog" command="close">Cancel</button>
+    </footer>
+  </form>
 </dialog>

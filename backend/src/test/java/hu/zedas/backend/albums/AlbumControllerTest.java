@@ -2,6 +2,7 @@ package hu.zedas.backend.albums;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ class AlbumControllerTest {
                 Integer.class);
         var artist = artistRepository.findAll().get(0);
         AlbumPostRequest request = new AlbumPostRequest();
-        request.setArtistId(artist.getArtistId());
+        request.setArtistName(artist.getName());
         request.setTitle("New album");
 
         var response = albumController.createAlbum(request);
@@ -56,5 +57,28 @@ class AlbumControllerTest {
         assertEquals("New album", response.getBody().title());
         assertEquals(response.getBody().albumId(), jdbcTemplate.queryForObject(
                 "SELECT seq FROM sqlite_sequence WHERE name = 'albums'", Integer.class));
+    }
+
+    @Test
+    @Transactional
+    void createsNewArtistWhenArtistNameIsUnknown() {
+        AlbumPostRequest request = new AlbumPostRequest();
+        request.setArtistName("Unknown Artist For Test");
+        request.setTitle("Album of a new artist");
+
+        var response = albumController.createAlbum(request);
+
+        var createdArtist = artistRepository.findFirstByName("Unknown Artist For Test").orElseThrow();
+        assertEquals(createdArtist.getArtistId(), response.getBody().artistId());
+    }
+
+    @Test
+    @Transactional
+    void rejectsDuplicateAlbumTitle() {
+        AlbumPostRequest request = new AlbumPostRequest();
+        request.setArtistName("Any Artist");
+        request.setTitle(albumController.getAllAlbums().get(0).title());
+
+        assertThrows(BusinessValidationException.class, () -> albumController.createAlbum(request));
     }
 }

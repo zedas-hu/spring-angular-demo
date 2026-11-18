@@ -11,7 +11,7 @@ export const routes: Routes = [
         loadComponent: () => import('./tracks/tracks').then(m => m.Tracks) 
     },
     { 
-        path: 'album/:albumId', 
+        path: 'albums/:albumId', 
         loadComponent: () => import('./album/album').then(m => m.Album) 
     }
 ];

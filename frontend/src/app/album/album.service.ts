@@ -13,10 +13,42 @@ type FetchParams = {
     albumId: number;
 } | undefined;
 
+export interface AlbumCreateRequest {
+    title: string;
+    artistName: string;
+}
+
+export class AlbumCreateError extends Error {
+    constructor(
+        readonly detail: string,
+        readonly fieldErrors: Record<string, string>,
+    ) {
+        super(detail);
+    }
+}
+
 @Injectable({ providedIn: 'root' })
 export class AlbumService {
   // private readonly http = inject(HttpClient);
   private readonly currentAlbum = signal<number | null>(null);
+
+  async createAlbum(request: AlbumCreateRequest): Promise<AlbumRecord> {
+    const response = await fetch('/api/albums', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const problem = await response.json().catch(() => ({})) as {
+        detail?: string;
+        fieldErrors?: Record<string, string>;
+      };
+      throw new AlbumCreateError(problem.detail ?? 'ALBUM_CREATE_FAILED', problem.fieldErrors ?? {});
+    }
+
+    return response.json();
+  }
   
   readonly pageData = resource<AlbumRecord, FetchParams>({
     params: () => {

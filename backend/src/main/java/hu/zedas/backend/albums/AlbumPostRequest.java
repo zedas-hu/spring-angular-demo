@@ -1,22 +1,23 @@
 package hu.zedas.backend.albums;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class AlbumPostRequest {
-    @NotNull
-    private Integer artistId;
+    @NotBlank(message = "ARTIST_NAME_REQUIRED")
+    @Size(max = 120, message = "ARTIST_NAME_TOO_LONG")
+    private String artistName;
 
-    @NotBlank
-    @NotNull 
+    @NotBlank(message = "TITLE_REQUIRED")
+    @Size(max = 160, message = "TITLE_TOO_LONG")
     private String title;
 
-    public Integer getArtistId() {
-        return artistId;
+    public String getArtistName() {
+        return artistName;
     }
 
-    public void setArtistId(Integer artistId) {
-        this.artistId = artistId;
+    public void setArtistName(String artistName) {
+        this.artistName = artistName == null ? null : artistName.strip();
     }
 
     public String getTitle() {
@@ -24,6 +25,6 @@ public class AlbumPostRequest {
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.title = title == null ? null : title.strip();
     }
 }

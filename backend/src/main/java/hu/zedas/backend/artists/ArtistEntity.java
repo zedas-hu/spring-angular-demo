@@ -25,6 +25,10 @@ public class ArtistEntity {
     protected ArtistEntity() {
     }
 
+    public ArtistEntity(String name) {
+        this.name = name;
+    }
+
     public Integer getArtistId() {
         return artistId;
     }

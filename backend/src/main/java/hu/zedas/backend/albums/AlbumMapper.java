@@ -1,6 +1,6 @@
 package hu.zedas.backend.albums;
 
-import org.mapstruct.BeanMapping;
+// import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -27,9 +27,9 @@ public interface AlbumMapper {
         return TrackMapper.INSTANCE.toResponse(entity);
     }
 
-    @BeanMapping(ignoreUnmappedSourceProperties = "artistId")
-    @Mapping(target = "albumId", ignore = true)
-    @Mapping(target = "artist", ignore = true)
-    @Mapping(target = "tracks", ignore = true)
-    AlbumEntity toEntity(AlbumPostRequest request);
+    // @BeanMapping(ignoreUnmappedSourceProperties = "artistName")
+    // @Mapping(target = "albumId", ignore = true)
+    // @Mapping(target = "artist", ignore = true)
+    // @Mapping(target = "tracks", ignore = true)
+    // AlbumEntity toEntity(AlbumPostRequest request);
 }

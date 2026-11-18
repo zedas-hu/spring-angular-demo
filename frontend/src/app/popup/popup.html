@@ -1,0 +1,6 @@
+<div [class]="className() +' popup-box'">
+    <button class="tool text-button" [attr.popovertarget]="uniqueId" [style.anchor-name]="'--' + uniqueId + '-trigger'">{{ text() }}</button>
+    <div class="inner" [id]="uniqueId" popover [style.position-anchor]="'--' + uniqueId + '-trigger'">
+        <ng-content />
+    </div>
+</div>

@@ -1,43 +1,33 @@
 # TODO
 
-Forrás adat:
-
-https://www.sqlitetutorial.net/sqlite-sample-database/
-
-## Fősáv
-
-- Tracks
-- Album
-- Login
-
-## Tracks nézet fül
-
-- Aktuális oldal az url-be?
-
-## Album nézet fül
-
-- Egy album teljes nézete
-  + Ha nincs album, akkor felvitel vagy átmenési lehetőség a tracks-ra
-    - Szerzők
-      - Szerző kiválasztása egy dialógusból
-      - Új szerző hozzáadása
-    + Track lista
-      + Ugyanaz, mint a tracks-nél
-      - Track szerkesztése
-    - Idő szumma alul
-    - Új track felvitele a lista végén
-      - Meglévő track hozzáadása
-
-## Új album
-
-- Új album létrehozása
-  - Title
-    - A szerverről visszatérő hibát 
+- New album kódokat átnézni
   - Meglévő artist beírása, vagy új kiválasztása
-  - Új artist
+  - Selector kontrol
+- Lista / Id kontroll
+- Új track felvitele a lista végén
 
 ## Bejelentkezés
 
+- Fősávba login
+- Login dialógus
 - Ez az employees tábla alapján lehetséges
+- A new, stb. csak belejentkezve legyenek elérhetők
+  - A popunál legyen egy "simulated login" felirat.
 
-## Docker
+## Docker deploy
+
+## GIT deploy
+
+This is a demo project based on the "chinook" sqlite tutorial database.
+(Availabe from https://www.sqlitetutorial.net/sqlite-sample-database/)
+
+Angular frontend with language change, dark/light theme, search, paging, 
+
+
+Verziók
+Spring
+  JPA
+Angular
+  signal, resource, form
+Database
+  SqLite

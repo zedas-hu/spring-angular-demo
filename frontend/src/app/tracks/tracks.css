@@ -7,16 +7,10 @@ main {
         margin-top: 0;
         margin-bottom: 2rem;
         align-items: baseline;
+        padding: 0 0.5rem;
 
         h1 {
             margin: 0 0 0 0.5rem;
-        }
-
-        button.tool {
-            cursor: pointer;
-            border: 0;
-            background-color: transparent;
-            font-size: 1.5rem;
         }
 
         div.filter {
@@ -33,57 +27,31 @@ main {
             }
         }
 
-        div.new {
-            button.tool {
-                anchor-name: --new-trigger;
-            }
+        app-popup.order {
+            label {
+                margin-bottom: 1rem;
+                text-align: right;
 
-            div.new-inner {
-                position-anchor: --new-trigger;
-
-                label {
-                    cursor: pointer;
-                    display: block;
-                    text-align: center;
-                    margin:0.5rem;
+                &:first-of-type {
+                    margin-top: 0.5rem;
                 }
-            }
-        }
 
-        div.order {
-            button.tool {
-                anchor-name: --order-trigger;
-            }
+                &:last-of-type {
+                    margin-top: 1.5rem;
+                }
 
-            div.order-inner {
-                position-anchor: --order-trigger;
+                input {
+                    appearance: none;
+                    position: relative;
+                    margin-left: 2rem;
 
-                label {
-                    cursor: pointer;
-                    display: block;
-                    margin-bottom: 1rem;
+                    &:checked::before {
+                        content: "✓";
+                        color: var(--font-color);
 
-                    &:first-of-type {
-                        margin-top: 0.5rem;
-                    }
-
-                    &:last-of-type {
-                        margin-top: 1.5rem;
-                    }
-
-                    input {
-                        appearance: none;
-                        position: relative;
-                        margin-left: 2rem;
-
-                        &:checked::before {
-                            content: "✓";
-                            color: var(--font-color);
-
-                            position: absolute;
-                            top: -1rem;
-                            left: -1.5rem;
-                        }
+                        position: absolute;
+                        top: -1rem;
+                        left: -1.5rem;
                     }
                 }
             }
@@ -98,6 +66,7 @@ main {
             align-items: start;
             grid-template-columns: 3fr 2fr 1fr 5rem;
             row-gap: 0.5rem;
+            padding: 0 0.5rem;
 
             thead {
                 display: contents;
@@ -166,7 +135,7 @@ main {
         display: grid;
         grid-template-columns: 3rem 3rem 1fr 3rem 3rem;
         gap: 0.5rem;
-
+        padding: 0 0.5rem;
         border-top: 1px solid var(--line-color);
         margin-top: 1rem;
         padding-top: 1rem;

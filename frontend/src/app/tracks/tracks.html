@@ -1,44 +1,38 @@
 <main>
     <header>
-        <h1>၊၊||၊ Tracks</h1>
+        <h1>၊၊||၊ {{ t('TRACKS') }}</h1>
         @if (tracksService.displayedPage()) {
             <div class="filter">
                 @if (tracksService.getFilter() === undefined) {
-                    <button class="tool text-button" (click)="startSearch()">Search 🔎︎</button>
+                    <button class="tool text-button" (click)="startSearch()">{{ t('SEARCH') }} 🔎︎</button>
                 } @else {
                     <input #searchInput type="text" [value]="tracksService.getFilter()" (blur)="tracksService.getFilter() === '' &&tracksService.setFilter(undefined)" (input)="tracksService.setFilter($event.target.value)" />
                     <button class="tool" (click)="tracksService.setFilter(undefined)">✖</button>
                 }
             </div>
 
-            <div class="order">
-                <button class="tool text-button" popovertarget="orderpopover">Order ⇅</button>
-                <div class="order-inner popup-box" id="orderpopover" popover>
-                    <label><input type="radio" name="order" value="name" (click)="tracksService.setSort('name')" 
-                        [checked]="tracksService.getSort() === 'name'" />Name</label>
-                    <label><input type="radio" name="order" value="album" (click)="tracksService.setSort('albumTitle')" 
-                        [checked]="tracksService.getSort() === 'albumTitle'" />Album</label>
-                    <label><input type="radio" name="order" value="artist" (click)="tracksService.setSort('albumArtistName')" 
-                        [checked]="tracksService.getSort() === 'albumArtistName'" />Artist</label>
-                    <label><input type="radio" name="order" value="genre" (click)="tracksService.setSort('genreName')" 
-                        [checked]="tracksService.getSort() === 'genreName'" />Genre</label>
-                    <label><input type="radio" name="order" value="composer" (click)="tracksService.setSort('composer')" 
-                        [checked]="tracksService.getSort() === 'composer'" />Composer</label>
-                    <label><input type="radio" name="order" value="length" (click)="tracksService.setSort('mediaTypeName')" 
-                        [checked]="tracksService.getSort() === 'mediaTypeName'" />Media type</label>
-                    <label><input type="checkbox" class="column-toggle" (click)="tracksService.setDirection(tracksService.getDirection() === 'asc' ? 'desc' : 'asc')" 
-                        [checked]="tracksService.getDirection() === 'asc'" />Ascending</label>
-                </div>
-            </div>
+            <app-popup class="order" text="{{ t('ORDER') }} ⇅">
+                <label><input type="radio" name="order" value="name" (click)="tracksService.setSort('name')" 
+                    [checked]="tracksService.getSort() === 'name'" />{{ t('NAME') }}</label>
+                <label><input type="radio" name="order" value="album" (click)="tracksService.setSort('albumTitle')" 
+                    [checked]="tracksService.getSort() === 'albumTitle'" />{{ t('ALBUM') }}</label>
+                <label><input type="radio" name="order" value="artist" (click)="tracksService.setSort('albumArtistName')" 
+                    [checked]="tracksService.getSort() === 'albumArtistName'" />{{ t('ARTIST') }}</label>
+                <label><input type="radio" name="order" value="genre" (click)="tracksService.setSort('genreName')" 
+                    [checked]="tracksService.getSort() === 'genreName'" />{{ t('GENRE') }}</label>
+                <label><input type="radio" name="order" value="composer" (click)="tracksService.setSort('composer')" 
+                    [checked]="tracksService.getSort() === 'composer'" />{{ t('COMPOSER') }}</label>
+                <label><input type="radio" name="order" value="length" (click)="tracksService.setSort('mediaTypeName')" 
+                    [checked]="tracksService.getSort() === 'mediaTypeName'" />{{ t('MEDIA_TYPE') }}</label>
+                <label><input type="checkbox" class="column-toggle" (click)="tracksService.setDirection(tracksService.getDirection() === 'asc' ? 'desc' : 'asc')" 
+                    [checked]="tracksService.getDirection() === 'asc'" />{{ t('ASCENDING') }}</label>
+            </app-popup>
 
-            <div class="new">
-                <button class="tool text-button" popovertarget="newpopover">New +</button>
-                <div class="new-inner popup-box" id="newpopover" popover>
-                    <label>
-                        <a class="tool" (click)="showNewAlbumDialog()">Album</a>
-                    </label>
-                </div>
-            </div>
+            <app-popup class="new" text="{{ t('NEW') }} +">
+                <label>
+                    <a class="tool" (click)="showNewAlbumDialog()">{{ t('ALBUM') }}</a>
+                </label>
+            </app-popup>
         }
     </header>
 
@@ -47,15 +41,15 @@
             <thead>
                 <tr>
                     <th>
-                        <span class="title text-button" (click)="setOrder('name')">Name</span>
+                        <span class="title text-button" (click)="setOrder('name')">{{ t('NAME') }}</span>
                         <span class="direction">@if (tracksService.getSort() === 'name' && tracksService.getDirection() === 'asc') {⏷} @else if (tracksService.getSort() === 'name' && tracksService.getDirection() === 'desc') {⏶}</span>
                     </th>
                     <th>
-                        <span class="title text-button" (click)="setOrder('albumTitle')">Album</span>
+                        <span class="title text-button" (click)="setOrder('albumTitle')">{{ t('ALBUM') }}</span>
                         <span class="direction">@if (tracksService.getSort() === 'albumTitle' && tracksService.getDirection() === 'asc') {⏷} @else if (tracksService.getSort() === 'albumTitle' && tracksService.getDirection() === 'desc') {⏶}</span>
                     </th>
                     <th>
-                        <span class="title text-button" (click)="setOrder('genreName')">Genre</span>
+                        <span class="title text-button" (click)="setOrder('genreName')">{{ t('GENRE') }}</span>
                         <span class="direction">@if (tracksService.getSort() === 'genreName' && tracksService.getDirection() === 'asc') {⏷} @else if (tracksService.getSort() === 'genreName' && tracksService.getDirection() === 'desc') {⏶}</span>
                     </th>
                     <th style="text-align: right;">◷</th>
@@ -63,11 +57,11 @@
             </thead>
             <tbody>
             @if (!tracksService.displayedPage() && pageResource.isLoading()) {
-                <tr><td colspan="5">Loading tracks...</td></tr>
+                <tr><td colspan="5">{{ t('LOADING_TRACKS') }}</td></tr>
             }
             @else if (pageResource.error(); as error) {
                 <tr><td colspan="5">
-                    <p role="alert">Could not load tracks: {{ errorMessage(error) }}</p>
+                    <p role="alert">{{ t('LOAD_TRACKS_FAILED') }} {{ errorMessage(error) }}</p>
                 </td></tr>
             }
             @else if (tracksService.displayedPage(); as page) {
@@ -90,7 +84,7 @@
     @if (tracksService.displayedPage(); as page) {
         <button class="mover" (click)="firstPage()" [disabled]="page.first">❮❮</button>
         <button class="mover" (click)="previousPage()" [disabled]="page.first">❮</button>
-        <span>Page {{ page.number + 1 }} of {{ page.totalPages }}</span>
+        <span>{{ t('PAGE_OF', page.number + 1, page.totalPages) }}</span>
         <button class="mover" (click)="nextPage()" [disabled]="page.last">❯</button>
         <button class="mover" (click)="lastPage()" [disabled]="page.last">❯❯</button>
     }
