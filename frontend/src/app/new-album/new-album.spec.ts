@@ -23,7 +23,18 @@ describe('NewAlbumComponent', () => {
   };
 
   beforeEach(async () => {
-    fetchMock = vi.fn();
+    fetchMock = vi.fn(async (url: string) => {
+      if (url === '/api/artists/keys') {
+        return jsonResponse(200, [{ key: 3, value: 'Artist' }]);
+      }
+      return jsonResponse(201, {
+        albumId: 9,
+        title: 'New',
+        artistId: 3,
+        artistName: 'Artist',
+        tracks: [],
+      });
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     await TestBed.configureTestingModule({
@@ -32,13 +43,15 @@ describe('NewAlbumComponent', () => {
 
     fixture = TestBed.createComponent(NewAlbumComponent);
     fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it('creates the album with the entered title and artist name and emits its id', async () => {
+  it('creates the album with the selected artist ID and emits its ID', async () => {
     fetchMock.mockResolvedValue(jsonResponse(201, { albumId: 9, title: 'New', artistId: 3, artistName: 'Artist', tracks: [] }));
     const created = vi.fn();
     fixture.componentInstance.created.subscribe(created);
@@ -49,9 +62,20 @@ describe('NewAlbumComponent', () => {
 
     expect(fetchMock).toHaveBeenCalledWith('/api/albums', expect.objectContaining({
       method: 'POST',
-      body: JSON.stringify({ title: 'New', artistName: 'Artist' }),
+      body: JSON.stringify({ title: 'New', artistName: 'Artist', artistId: 3 }),
     }));
     expect(created).toHaveBeenCalledWith(9);
+  });
+
+  it('sends a null artist ID for a name that does not match an existing artist', async () => {
+    typeInto('album-title', 'New');
+    typeInto('album-artist', 'A new artist');
+    await submit();
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/albums', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ title: 'New', artistName: 'A new artist', artistId: null }),
+    }));
   });
 
   it('shows server field errors next to the matching field', async () => {
@@ -73,7 +97,8 @@ describe('NewAlbumComponent', () => {
   it('does not call the API until the required fields are filled', async () => {
     await submit();
 
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith('/api/artists/keys');
+    expect(fetchMock).not.toHaveBeenCalledWith('/api/albums', expect.anything());
     expect(fixture.nativeElement.querySelectorAll('.field-error').length).toBe(2);
   });
 });

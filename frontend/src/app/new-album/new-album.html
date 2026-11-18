@@ -17,12 +17,14 @@
       }
 
       <label for="album-artist">Artist</label><br/>
-      <input
-        id="album-artist"
-        type="text"
-        [formField]="albumForm.artistName"
-        [attr.aria-invalid]="albumForm.artistName().touched() && albumForm.artistName().invalid()"
-      >
+      <app-selector
+        inputId="album-artist"
+        [keyProvider]="artistKeyProvider"
+        [value]="albumForm.artistName().value()"
+        (valueChange)="setArtistName($event)"
+        (keyChange)="setArtistId($event)"
+        [ariaInvalid]="albumForm.artistName().touched() && albumForm.artistName().invalid()"
+      />
       @if (albumForm.artistName().touched()) {
         @for (error of albumForm.artistName().errors(); track $index) {
           <p class="field-error" role="alert">{{ t(error.message!) }}</p>

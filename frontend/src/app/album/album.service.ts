@@ -16,6 +16,7 @@ type FetchParams = {
 export interface AlbumCreateRequest {
     title: string;
     artistName: string;
+    artistId: number | null;
 }
 
 export class AlbumCreateError extends Error {

@@ -12,12 +12,22 @@ public class AlbumPostRequest {
     @Size(max = 160, message = "TITLE_TOO_LONG")
     private String title;
 
+    private Integer artistId;
+
     public String getArtistName() {
         return artistName;
     }
 
     public void setArtistName(String artistName) {
         this.artistName = artistName == null ? null : artistName.strip();
+    }
+
+    public Integer getArtistId() {
+        return artistId;
+    }
+
+    public void setArtistId(Integer artistId) {
+        this.artistId = artistId;
     }
 
     public String getTitle() {

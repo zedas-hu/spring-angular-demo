@@ -1,1 +1,17 @@
-<p>selector works!</p>
+<input
+  [id]="inputId()"
+  [attr.list]="uniqueId"
+  [attr.aria-invalid]="ariaInvalid() ? 'true' : null"
+  [value]="value()"
+  (input)="onInput($event)"
+/>
+<datalist [id]="uniqueId">
+    @if (keyList.hasValue()) {
+        @for (r of keyList.value(); track r.key) {
+            <option [value]="r.value">{{ r.value }}</option>
+        }
+    }
+</datalist>
+@if (keyList.error(); as error) {
+    <p role="alert">{{ errorMessage(error) }}</p>
+}

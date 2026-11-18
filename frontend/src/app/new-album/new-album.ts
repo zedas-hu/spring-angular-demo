@@ -2,16 +2,19 @@ import { Component, ElementRef, viewChild, output, inject, signal } from '@angul
 import { form, FormField, FormRoot, required, type FieldTree, type TreeValidationResult } from '@angular/forms/signals';
 import { AlbumCreateError, AlbumService } from '../album/album.service';
 import { TranslationService, Translator } from '../i18n/translation.service';
+import { KeyProvider } from '../keyprovider';
+import { Selector } from '../selector/selector';
 
 interface NewAlbumModel {
   title: string;
   artistName: string;
+  artistId: number | null;
 }
 
 @Component({
   selector: 'app-new-album',
   standalone: true,
-  imports: [FormField, FormRoot],
+  imports: [FormField, FormRoot, Selector],
   templateUrl: './new-album.html',
   styleUrls: ['./new-album.css']
 })
@@ -19,17 +22,19 @@ export class NewAlbumComponent {
   private readonly albumService = inject(AlbumService);
   private readonly translations = inject(TranslationService);
   private dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
+  private readonly albumModel = signal<NewAlbumModel>({ title: '', artistName: '', artistId: null });
 
   closed = output<void>();
   created = output<number>();
 
   readonly formError = signal<string | null>(null);
+  readonly artistKeyProvider = new KeyProvider('artists');
 
   // readonly t = (code?: string) => this.translations.translate(code ?? '');
   readonly t: Translator = this.translations.translate.bind(this.translations);
 
   readonly albumForm = form(
-    signal<NewAlbumModel>({ title: '', artistName: '' }),
+    this.albumModel,
     (path) => {
       required(path.title, { message: 'TITLE_REQUIRED' });
       required(path.artistName, { message: 'ARTIST_NAME_REQUIRED' });
@@ -37,12 +42,24 @@ export class NewAlbumComponent {
     { submission: { action: () => this.createAlbum() } },
   );
 
+  setArtistName(artistName: string): void {
+    this.albumModel.update((album) => ({ ...album, artistName }));
+  }
+
+  setArtistId(artistId: number | undefined): void {
+    this.albumModel.update((album) => ({ ...album, artistId: artistId ?? null }));
+  }
+
   private async createAlbum(): Promise<TreeValidationResult> {
-    const { title, artistName } = this.albumForm().value();
+    const { title, artistName, artistId } = this.albumForm().value();
     this.formError.set(null);
 
     try {
-      const album = await this.albumService.createAlbum({ title, artistName });
+      const album = await this.albumService.createAlbum({
+        title,
+        artistName,
+        artistId,
+      });
       this.created.emit(album.albumId);
       return undefined;
     } catch (error) {

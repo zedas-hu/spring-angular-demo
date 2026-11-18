@@ -3,6 +3,7 @@
   "TITLE_TOO_LONG": "Az album címe legfeljebb 160 karakter lehet.",
   "ARTIST_NAME_REQUIRED": "Adj meg egy előadónevet.",
   "ARTIST_NAME_TOO_LONG": "Az előadó neve legfeljebb 120 karakter lehet.",
+  "ARTIST_NOT_FOUND": "A kiválasztott előadó nem található. Válaszd ki újra, vagy adj meg új előadónevet.",
   "TITLE_DUPLICATION": "Már létezik album ugyanezzel a címmel.",
   "INVALID_ALBUM_DATA": "Az album adatai érvénytelenek.",
   "ALBUM_CREATE_FAILED": "Az album létrehozása nem sikerült. Próbáld újra.",

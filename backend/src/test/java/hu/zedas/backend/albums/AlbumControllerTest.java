@@ -47,6 +47,7 @@ class AlbumControllerTest {
         var artist = artistRepository.findAll().get(0);
         AlbumPostRequest request = new AlbumPostRequest();
         request.setArtistName(artist.getName());
+        request.setArtistId(artist.getArtistId());
         request.setTitle("New album");
 
         var response = albumController.createAlbum(request);
@@ -70,6 +71,36 @@ class AlbumControllerTest {
 
         var createdArtist = artistRepository.findFirstByName("Unknown Artist For Test").orElseThrow();
         assertEquals(createdArtist.getArtistId(), response.getBody().artistId());
+    }
+
+    @Test
+    @Transactional
+    void createsNewArtistWhenNoArtistIdIsProvidedEvenIfTheNameAlreadyExists() {
+        var existingArtist = artistRepository.findAll().get(0);
+        AlbumPostRequest request = new AlbumPostRequest();
+        request.setArtistName(existingArtist.getName());
+        request.setTitle("Album for a new artist with a matching name");
+
+        var response = albumController.createAlbum(request);
+
+        assertFalse(response.getBody().artistId().equals(existingArtist.getArtistId()));
+        assertEquals(existingArtist.getName(), artistRepository.findById(response.getBody().artistId())
+                .orElseThrow().getName());
+    }
+
+    @Test
+    @Transactional
+    void rejectsUnknownArtistId() {
+        AlbumPostRequest request = new AlbumPostRequest();
+        request.setArtistId(Integer.MAX_VALUE);
+        request.setArtistName("Unknown Artist");
+        request.setTitle("Album with an invalid artist id");
+
+        var exception = assertThrows(BusinessValidationException.class,
+                () -> albumController.createAlbum(request));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("artistId", exception.getField());
     }
 
     @Test

@@ -1,5 +1,7 @@
 # TODO
 
+- Search mező DOS-védelem
+
 - New album kódokat átnézni
   - Meglévő artist beírása, vagy új kiválasztása
   - Selector kontrol
