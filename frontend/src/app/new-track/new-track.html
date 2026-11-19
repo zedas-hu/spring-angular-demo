@@ -1,5 +1,5 @@
 <dialog #dialog class="dialog-box" id="new-track-dialog">
-  <header><h1>{{ t('NEW_TRACK') }}</h1></header>
+  <header><h1>{{ t(track() ? 'EDIT_TRACK' : 'NEW_TRACK') }}</h1></header>
 
   <form [formRoot]="trackForm">
     <content>
@@ -108,7 +108,7 @@
 
     <footer>
       <button type="submit" class="tool text-button" [disabled]="trackForm().invalid() || !options.hasValue()">
-        {{ t('CREATE') }}
+        {{ t(track() ? 'SAVE' : 'CREATE') }}
       </button>
       <button type="button" class="tool text-button" (click)="close()">{{ t('CANCEL') }}</button>
     </footer>

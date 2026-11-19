@@ -1,8 +1,9 @@
 import { Component, effect, ElementRef, inject, input, output, resource, signal, untracked, viewChild } from '@angular/core';
 import { form, FormField, FormRoot, required, validate, type FieldTree, type TreeValidationResult } from '@angular/forms/signals';
-import { TrackCreateError, TracksService } from '../tracks/tracks.service';
+import { TrackRecord, TrackSaveError, TracksService } from '../tracks/tracks.service';
 import { TranslationService, Translator } from '../i18n/translation.service';
 import { MessagesService } from '../messages';
+import { formatDuration } from '../tools';
 
 interface GenreOption {
   genreId: number;
@@ -41,8 +42,10 @@ export class NewTrack {
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 
   readonly albumId = input.required<number>();
+  readonly track = input<TrackRecord | null>(null);
   readonly closed = output<void>();
   readonly created = output<void>();
+  readonly updated = output<void>();
   readonly formError = signal<string | null>(null);
   readonly t: Translator = this.translations.translate.bind(this.translations);
   private readonly trackModel = signal<NewTrackModel>({
@@ -116,10 +119,28 @@ export class NewTrack {
           : { kind: 'price', message: 'UNIT_PRICE_INVALID' };
       });
     },
-    { submission: { action: () => this.createTrack() } },
+    { submission: { action: () => this.saveTrack() } },
   );
 
   constructor() {
+    effect(() => {
+      const track = this.track();
+      this.trackModel.set(track ? {
+        name: track.name,
+        genreId: track.genreId === null ? '' : String(track.genreId),
+        mediaTypeId: track.mediaTypeId === null ? '' : String(track.mediaTypeId),
+        composer: track.composer ?? '',
+        duration: formatDuration(track.milliseconds),
+        unitPrice: track.unitPrice ?? 0.99,
+      } : {
+        name: '',
+        genreId: '',
+        mediaTypeId: '',
+        composer: '',
+        duration: '',
+        unitPrice: 0.99,
+      });
+    });
     effect(() => {
       const error = this.options.error();
       if (error) {
@@ -132,20 +153,27 @@ export class NewTrack {
       const message = this.formError();
       if (message) {
         untracked(() => this.messages.error(
-          this.translations.translateError(message, 'TRACK_CREATE_FAILED'),
+          this.translations.translateError(
+            message,
+            this.track() ? 'TRACK_UPDATE_FAILED' : 'TRACK_CREATE_FAILED',
+          ),
         ));
       }
     });
   }
 
-  private async createTrack(): Promise<TreeValidationResult> {
+  private async saveTrack(): Promise<TreeValidationResult> {
     const { name, genreId, mediaTypeId, composer, duration, unitPrice } = this.trackForm().value();
     const [minutes, seconds] = duration.split(':').map(Number);
-    const milliseconds = (minutes * 60 + seconds) * 1000;
+    const existingTrack = this.track();
+    const originalDuration = existingTrack ? formatDuration(existingTrack.milliseconds) : '';
+    const milliseconds = existingTrack && duration === originalDuration && existingTrack.milliseconds !== null
+      ? existingTrack.milliseconds
+      : (minutes * 60 + seconds) * 1000;
     this.formError.set(null);
 
     try {
-      await this.tracksService.createTrack({
+      const request = {
         name: name.trim(),
         albumId: this.albumId(),
         genreId: Number(genreId),
@@ -153,15 +181,21 @@ export class NewTrack {
         composer: composer.trim() || null,
         milliseconds,
         unitPrice,
-      });
-      this.created.emit();
+      };
+      if (existingTrack) {
+        await this.tracksService.updateTrack(existingTrack.trackId, request);
+        this.updated.emit();
+      } else {
+        await this.tracksService.createTrack(request);
+        this.created.emit();
+      }
       return undefined;
     } catch (error) {
-      if (!(error instanceof TrackCreateError)) {
+      if (!(error instanceof TrackSaveError)) {
         if (!(error instanceof Error)) {
           throw error;
         }
-        this.formError.set('TRACK_CREATE_FAILED');
+        this.formError.set(existingTrack ? 'TRACK_UPDATE_FAILED' : 'TRACK_CREATE_FAILED');
         return undefined;
       }
 

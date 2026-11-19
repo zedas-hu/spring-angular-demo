@@ -127,4 +127,50 @@ describe('NewTrack', () => {
 
     expect(fixture.nativeElement.textContent).toContain('A track with the same name already exists in this album.');
   });
+
+  it('updates an existing track and preserves its exact duration when unchanged', async () => {
+    const updated = vi.fn();
+    fixture.componentInstance.updated.subscribe(updated);
+    fixture.componentRef.setInput('track', {
+      trackId: 42,
+      name: 'Old name',
+      albumId: 7,
+      albumTitle: 'Album',
+      artistName: 'Artist',
+      genreId: 2,
+      genreName: 'Rock',
+      mediaTypeId: 1,
+      mediaTypeName: 'MPEG audio file',
+      composer: 'Composer',
+      milliseconds: 225500,
+      unitPrice: 0.99,
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.trackForm().value()).toEqual({
+      name: 'Old name',
+      genreId: '2',
+      mediaTypeId: '1',
+      composer: 'Composer',
+      duration: '3:45',
+      unitPrice: 0.99,
+    });
+
+    setValue('track-name', 'Updated name');
+    await submit();
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/tracks/42', expect.objectContaining({
+      method: 'PUT',
+      body: JSON.stringify({
+        name: 'Updated name',
+        albumId: 7,
+        genreId: 2,
+        mediaTypeId: 1,
+        composer: 'Composer',
+        milliseconds: 225500,
+        unitPrice: 0.99,
+      }),
+    }));
+    expect(updated).toHaveBeenCalledOnce();
+  });
 });

@@ -2,9 +2,6 @@
 
 - Search mező DOS-védelem
 
-- Track szerkesztés
-- Track törlés
-
 ## Bejelentkezés
 
 - Fősávba login

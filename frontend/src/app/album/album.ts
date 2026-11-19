@@ -6,6 +6,7 @@ import { TranslationService, Translator } from '../i18n/translation.service';
 import { MessagesService } from '../messages';
 import { AlbumService } from './album.service';
 import { NewTrack } from '../new-track/new-track';
+import { TrackRecord, TracksService } from '../tracks/tracks.service';
 
 @Component({
   selector: 'app-album',
@@ -18,9 +19,10 @@ export class Album {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly viewContainer = inject(ViewContainerRef);
+  private readonly tracksService = inject(TracksService);
   private readonly translations = inject(TranslationService);
   private readonly messages = inject(MessagesService);
-  private newTrackDialog?: ComponentRef<NewTrack>;
+  private trackDialog?: ComponentRef<NewTrack>;
   private readonly routeParams = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
@@ -69,25 +71,62 @@ export class Album {
     }
   }
 
+  async deleteTrack(trackId: number): Promise<void> {
+    if (!window.confirm(this.t('DELETE_TRACK_CONFIRM'))) {
+      return;
+    }
+
+    try {
+      await this.tracksService.deleteTrack(trackId);
+      this.pageResource.reload();
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
+      }
+      this.messages.error(
+        this.translations.translateError(error.message, 'TRACK_DELETE_FAILED'),
+      );
+    }
+  }
+
+  editTrack(trackId: number): void {
+    const track = this.albumService.displayedPage()?.tracks.find(
+      candidate => candidate.trackId === trackId,
+    );
+    if (!track) {
+      this.messages.error(this.t('TRACK_NOT_FOUND'));
+      return;
+    }
+
+    this.openTrackDialog(track.albumId, track);
+  }
+
   createTrack(): void {
     const albumId = this.selectedAlbumId();
     if (albumId === null) {
       return;
     }
 
-    if (!this.newTrackDialog) {
+    this.openTrackDialog(albumId);
+  }
+
+  private openTrackDialog(albumId: number, track: TrackRecord | null = null): void {
+    if (!this.trackDialog) {
       const dialog = this.viewContainer.createComponent(NewTrack);
       dialog.setInput('albumId', albumId);
+      dialog.setInput('track', track);
       dialog.changeDetectorRef.detectChanges();
       dialog.instance.closed.subscribe(() => this.destroyNewTrackDialog());
-      dialog.instance.created.subscribe(() => {
+      const reloadAlbum = () => {
         this.destroyNewTrackDialog();
         this.pageResource.reload();
-      });
-      this.newTrackDialog = dialog;
+      };
+      dialog.instance.created.subscribe(reloadAlbum);
+      dialog.instance.updated.subscribe(reloadAlbum);
+      this.trackDialog = dialog;
     }
 
-    this.newTrackDialog.instance.open();
+    this.trackDialog.instance.open();
   }
 
   private syncAlbum(): void {
@@ -95,8 +134,8 @@ export class Album {
   }
 
   private destroyNewTrackDialog(): void {
-    this.newTrackDialog?.destroy();
-    this.newTrackDialog = undefined;
+    this.trackDialog?.destroy();
+    this.trackDialog = undefined;
   }
 
 }

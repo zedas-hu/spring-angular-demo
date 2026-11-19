@@ -32,6 +32,7 @@
             <thead>
                 <tr>
                     <th>{{ t('NAME') }}</th>
+                    <th></th>
                     <th>{{ t('GENRE') }}</th>
                     <th style="text-align: right;">◷</th>
                 </tr>
@@ -41,6 +42,10 @@
                 @for (track of page.tracks; track track.trackId) {
                     <tr>
                         <td class="name">{{ track.name }}</td>
+                        <td class="tools">
+                          <a class="text-button" (click)="editTrack(track.trackId)">✎</a><span> </span>
+                          <a class="text-button" (click)="deleteTrack(track.trackId)">🗙</a>
+                        </td>
                         <td class="genre">{{ track.genreName }}</td>
                         <td class="length">{{ convertToMinutes(track.milliseconds) }}</td>
                     </tr>
@@ -49,6 +54,7 @@
             </tbody>
             <tfoot>
                 <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td class="length">{{ 

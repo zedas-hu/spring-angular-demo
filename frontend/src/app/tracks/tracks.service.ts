@@ -8,7 +8,9 @@ export interface TrackRecord {
   albumId: number;
   albumTitle: string | null;
   artistName: string | null;
+  genreId: number | null;
   genreName: string | null;
+  mediaTypeId: number | null;
   mediaTypeName: string | null;
   composer: string | null;
   milliseconds: number | null;
@@ -25,7 +27,7 @@ export interface TrackCreateRequest {
   unitPrice: number;
 }
 
-export class TrackCreateError extends Error {
+export class TrackSaveError extends Error {
   constructor(
     readonly detail: string,
     readonly fieldErrors: Record<string, string>,
@@ -59,18 +61,38 @@ export class TracksService {
   private readonly direction = signal<SortDirection>('asc');
 
   async createTrack(request: TrackCreateRequest): Promise<TrackRecord> {
-    const response = await fetch('/api/tracks', {
-      method: 'POST',
+    return this.saveTrack('/api/tracks', 'POST', request, 'TRACK_CREATE_FAILED');
+  }
+
+  async updateTrack(trackId: number, request: TrackCreateRequest): Promise<TrackRecord> {
+    return this.saveTrack(`/api/tracks/${trackId}`, 'PUT', request, 'TRACK_UPDATE_FAILED');
+  }
+
+  async deleteTrack(trackId: number): Promise<void> {
+    const response = await fetch(`/api/tracks/${trackId}`, { method: 'DELETE' });
+    if (!response.ok) {
+      const problem = await response.json().catch(() => ({})) as { detail?: string };
+      throw new Error(problem.detail ?? 'TRACK_DELETE_FAILED');
+    }
+  }
+
+  private async saveTrack(
+    url: string,
+    method: 'POST' | 'PUT',
+    request: TrackCreateRequest,
+    fallbackError: string,
+  ): Promise<TrackRecord> {
+    const response = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
     });
-
     if (!response.ok) {
       const problem = await response.json().catch(() => ({})) as {
         detail?: string;
         fieldErrors?: Record<string, string>;
       };
-      throw new TrackCreateError(problem.detail ?? 'TRACK_CREATE_FAILED', problem.fieldErrors ?? {});
+      throw new TrackSaveError(problem.detail ?? fallbackError, problem.fieldErrors ?? {});
     }
 
     return response.json();

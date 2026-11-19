@@ -1,7 +1,9 @@
 package hu.zedas.backend.tracks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hu.zedas.backend.albums.AlbumEntity;
 import hu.zedas.backend.albums.AlbumRepository;
@@ -27,6 +29,9 @@ class TrackCreationTest {
 
     @Autowired
     private MediaTypeRepository mediaTypeRepository;
+
+    @Autowired
+    private TrackRepository tracksRepository;
 
     @Test
     @Transactional
@@ -79,5 +84,58 @@ class TrackCreationTest {
 
         request.setAlbumId(otherAlbum.getAlbumId());
         assertEquals(HttpStatus.CREATED, trackController.createTrack(request).getStatusCode());
+    }
+
+    @Test
+    @Transactional
+    void updatesTrackDetailsWithoutTreatingItsOwnNameAsADuplicate() {
+        TrackEntity existing = tracksRepository.findAll().get(0);
+        var album = albumRepository.findAll().get(0);
+        var genre = genreRepository.findAll().get(0);
+        var mediaType = mediaTypeRepository.findAll().get(0);
+        TrackPostRequest request = new TrackPostRequest();
+        request.setName(existing.getName());
+        request.setAlbumId(album.getAlbumId());
+        request.setGenreId(genre.getGenreId());
+        request.setMediaTypeId(mediaType.getMediaTypeId());
+        request.setComposer("Updated composer");
+        request.setMilliseconds(240000);
+        request.setUnitPrice(new java.math.BigDecimal("1.25"));
+
+        TrackResponse response = trackController.updateTrack(existing.getTrackId(), request);
+
+        assertEquals(existing.getTrackId(), response.trackId());
+        assertEquals(existing.getName(), response.name());
+        assertEquals(album.getAlbumId(), response.albumId());
+        assertEquals(genre.getGenreId(), response.genreId());
+        assertEquals(mediaType.getMediaTypeId(), response.mediaTypeId());
+        assertEquals("Updated composer", response.composer());
+        assertEquals(240000, response.milliseconds());
+        assertEquals(new java.math.BigDecimal("1.25"), response.unitPrice());
+    }
+
+    @Test
+    @Transactional
+    void deletesTrackAndReturnsNotFoundWhenItDoesNotExist() {
+        TrackEntity referenced = tracksRepository.findAll().stream()
+                .filter(track -> tracksRepository.countInvoiceItems(track.getTrackId()) > 0)
+                .findFirst()
+                .orElseThrow();
+        BusinessValidationException referencedError = assertThrows(
+                BusinessValidationException.class,
+                () -> trackController.deleteTrack(referenced.getTrackId()));
+        assertEquals("TRACK_DELETE_REFERENCED", referencedError.getMessage());
+
+        TrackEntity existing = tracksRepository.findAll().stream()
+                .filter(track -> tracksRepository.countInvoiceItems(track.getTrackId()) == 0)
+                .findFirst()
+                .orElseThrow();
+        Integer trackId = existing.getTrackId();
+
+        assertTrue(tracksRepository.countPlaylistReferences(trackId) > 0);
+        assertEquals(HttpStatus.NO_CONTENT, trackController.deleteTrack(trackId).getStatusCode());
+        assertFalse(tracksRepository.existsById(trackId));
+        assertEquals(0, tracksRepository.countPlaylistReferences(trackId));
+        assertEquals(HttpStatus.NOT_FOUND, trackController.deleteTrack(trackId).getStatusCode());
     }
 }

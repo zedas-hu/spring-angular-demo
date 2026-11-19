@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { TracksService } from './tracks.service';
+import { TrackCreateRequest, TracksService } from './tracks.service';
 
 describe('TracksService', () => {
   let service: TracksService;
+  let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({
+    fetchMock = vi.fn(async () => ({
       ok: true,
       json: async () => ({
         content: [],
@@ -18,7 +19,8 @@ describe('TracksService', () => {
         totalElements: 0,
         totalPages: 0,
       }),
-    })));
+    }));
+    vi.stubGlobal('fetch', fetchMock);
 
     TestBed.configureTestingModule({});
     service = TestBed.inject(TracksService);
@@ -37,5 +39,31 @@ describe('TracksService', () => {
 
     expect(service.getSort()).toBe('genreName');
     expect(service.getDirection()).toBe('desc');
+  });
+
+  it('updates a track with a PUT request', async () => {
+    const request: TrackCreateRequest = {
+      name: 'Updated track',
+      albumId: 7,
+      genreId: 2,
+      mediaTypeId: 1,
+      composer: null,
+      milliseconds: 225000,
+      unitPrice: 0.99,
+    };
+
+    await service.updateTrack(42, request);
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/tracks/42', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+  });
+
+  it('deletes a track with a DELETE request', async () => {
+    await service.deleteTrack(42);
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/tracks/42', { method: 'DELETE' });
   });
 });
