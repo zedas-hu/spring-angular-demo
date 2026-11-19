@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.EntityGraph;
 public interface TrackRepository extends JpaRepository<TrackEntity, Integer> {
     void deleteByAlbum_AlbumId(Integer albumId);
 
+    boolean existsByAlbum_AlbumIdAndNameIgnoreCase(Integer albumId, String name);
+
     @EntityGraph(attributePaths = {"album.artist", "mediaType", "genre"})
     Page<TrackEntity> findAll(Pageable pageable);
 

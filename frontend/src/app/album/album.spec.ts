@@ -1,17 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { routes } from '../app.routes';
 import { TranslationService } from '../i18n/translation.service';
+import { MessagesService } from '../messages';
 import { Album } from './album';
 
 describe('Album', () => {
   let component: Album;
   let fixture: ComponentFixture<Album>;
+  let messageError: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
+    messageError = vi.fn();
     await TestBed.configureTestingModule({
       imports: [Album],
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter(routes),
+        { provide: MessagesService, useValue: { error: messageError } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Album);
@@ -23,14 +30,14 @@ describe('Album', () => {
     expect(component).toBeTruthy();
   });
 
-  it('translates the invalid album ID message when the language changes', () => {
+  it('shows an invalid album ID through the messages service', () => {
     const translations = TestBed.inject(TranslationService);
 
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Invalid album ID.');
+    expect(messageError).toHaveBeenCalledWith('Invalid album ID.');
 
     translations.setLanguage('hu');
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Érvénytelen albumazonosító.');
+    expect(messageError).toHaveBeenCalledOnce();
   });
 });

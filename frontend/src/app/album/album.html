@@ -1,9 +1,7 @@
 <main>
   @if (!selectedAlbumId()) {
-    <p role="alert">{{ t('INVALID_ALBUM_ID') }}</p>
   }
-  @else if (pageResource.error(); as error) {
-    <p role="alert">{{ t('LOAD_ALBUM_FAILED') }} {{ errorMessage(error) }}</p>
+  @else if (pageResource.error()) {
   }
   @else if (pageResource.isLoading()) {
     <p>{{ t('LOADING_ALBUM') }}</p>
@@ -12,17 +10,18 @@
     <header>
       <h1>♪ {{ page.title }}</h1>
 
-      <div class="back">
+      <div class="delete">
         <a class="text-button" (click)="deleteAlbum()" >{{ t('DELETE') }} 🗙</a>
+      </div>
+
+      <div class="new">
+        <a class="text-button" (click)="createTrack()" >{{ t('NEW_TRACK') }} ✚</a>
       </div>
 
       <div class="back">
         <a class="text-button" [routerLink]="['/tracks']">{{ t('BACK') }} ↩</a>
       </div>
     </header>
-    @if (deleteError(); as error) {
-      <p role="alert">{{ t(error) }}</p>
-    }
     
     <header class="sub-header">
       <h2>{{ page.artistName }}</h2>

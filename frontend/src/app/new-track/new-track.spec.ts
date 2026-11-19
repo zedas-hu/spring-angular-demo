@@ -1,21 +1,130 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import { NewTrack } from './new-track';
 
 describe('NewTrack', () => {
-  let component: NewTrack;
   let fixture: ComponentFixture<NewTrack>;
+  let fetchMock: ReturnType<typeof vi.fn>;
+
+  const jsonResponse = (status: number, body: unknown) => ({
+    ok: status < 400,
+    status,
+    json: async () => body,
+  });
+  const setValue = (id: string, value: string) => {
+    const input = fixture.nativeElement.querySelector(`#${id}`) as HTMLInputElement | HTMLSelectElement;
+    input.value = value;
+    input.dispatchEvent(new Event('input'));
+    if (input instanceof HTMLSelectElement) {
+      input.dispatchEvent(new Event('change'));
+    }
+  };
+  const submit = async () => {
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement).click();
+    await new Promise(resolve => setTimeout(resolve));
+    fixture.detectChanges();
+  };
 
   beforeEach(async () => {
+    fetchMock = vi.fn(async (url: string) => {
+      if (url === '/api/genres') {
+        return jsonResponse(200, [{ genreId: 2, name: 'Rock' }]);
+      }
+      if (url === '/api/media-types') {
+        return jsonResponse(200, [{ mediaTypeId: 1, name: 'MPEG audio file' }]);
+      }
+      return jsonResponse(201, {});
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
     await TestBed.configureTestingModule({
       imports: [NewTrack],
     }).compileComponents();
 
     fixture = TestBed.createComponent(NewTrack);
-    component = fixture.componentInstance;
+    fixture.componentRef.setInput('albumId', 7);
+    fixture.detectChanges();
     await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('creates a track using the current album and converts the entered duration to milliseconds', async () => {
+    const created = vi.fn();
+    fixture.componentInstance.created.subscribe(created);
+
+    setValue('track-name', 'New track');
+    setValue('track-genre', '2');
+    setValue('track-media-type', '1');
+    setValue('track-composer', 'Composer');
+    setValue('track-duration', '3:45');
+    expect(fixture.componentInstance.trackForm().value()).toEqual({
+      name: 'New track',
+      genreId: '2',
+      mediaTypeId: '1',
+      composer: 'Composer',
+      duration: '3:45',
+      unitPrice: 0.99,
+    });
+    expect(fixture.componentInstance.trackForm().invalid()).toBe(false);
+    await submit();
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/tracks', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'New track',
+        albumId: 7,
+        genreId: 2,
+        mediaTypeId: 1,
+        composer: 'Composer',
+        milliseconds: 225000,
+        unitPrice: 0.99,
+      }),
+    }));
+    expect(created).toHaveBeenCalledOnce();
+  });
+
+  it('requires the duration to use minutes:seconds with seconds from 00 to 59', async () => {
+    setValue('track-name', 'New track');
+    setValue('track-genre', '2');
+    setValue('track-media-type', '1');
+    setValue('track-duration', '3:60');
+    (fixture.nativeElement.querySelector('#track-duration') as HTMLInputElement).dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    await submit();
+
+    expect(fetchMock).not.toHaveBeenCalledWith('/api/tracks', expect.anything());
+    expect(fixture.nativeElement.textContent).toContain('Enter the duration as minutes:seconds (for example, 3:45).');
+  });
+
+  it('shows the server error when the album already contains a track with that name', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url === '/api/genres') {
+        return jsonResponse(200, [{ genreId: 2, name: 'Rock' }]);
+      }
+      if (url === '/api/media-types') {
+        return jsonResponse(200, [{ mediaTypeId: 1, name: 'MPEG audio file' }]);
+      }
+      return jsonResponse(409, {
+        detail: 'TRACK_NAME_DUPLICATION',
+        fieldErrors: { name: 'TRACK_NAME_DUPLICATION' },
+      });
+    });
+
+    setValue('track-name', 'Duplicate');
+    setValue('track-genre', '2');
+    setValue('track-media-type', '1');
+    setValue('track-duration', '3:45');
+    await submit();
+
+    expect(fixture.nativeElement.textContent).toContain('A track with the same name already exists in this album.');
   });
 });

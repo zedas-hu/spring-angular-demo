@@ -1,0 +1,9 @@
+:host select {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dotted var(--line-color2);
+  color: var(--font-color);
+  font: inherit;
+  margin-top: 0.25rem;
+  width: 100%;
+}

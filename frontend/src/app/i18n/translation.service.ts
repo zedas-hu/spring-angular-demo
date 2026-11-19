@@ -10,6 +10,8 @@ const MESSAGES: Record<Language, Record<string, string>> = {
   hu: HU_MESSAGES,
 };
 
+type MessageCode = keyof typeof EN_MESSAGES;
+
 @Injectable({ providedIn: 'root' })
 export class TranslationService {
   readonly language = signal<Language>('en');
@@ -23,5 +25,10 @@ export class TranslationService {
     if (params.length === 0) 
       return message;
     return message.replace(/\$(\d+)/g, ($0, $1) => String(params[Number($1) - 1] ?? $0));
+  }
+
+  translateError(code: string, fallbackCode: MessageCode): string {
+    const messages = MESSAGES[this.language()];
+    return messages[code] ?? messages[fallbackCode];
   }
 }

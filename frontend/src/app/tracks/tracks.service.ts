@@ -15,6 +15,25 @@ export interface TrackRecord {
   unitPrice: number | null;
 }
 
+export interface TrackCreateRequest {
+  name: string;
+  albumId: number;
+  genreId: number;
+  mediaTypeId: number;
+  composer: string | null;
+  milliseconds: number;
+  unitPrice: number;
+}
+
+export class TrackCreateError extends Error {
+  constructor(
+    readonly detail: string,
+    readonly fieldErrors: Record<string, string>,
+  ) {
+    super(detail);
+  }
+}
+
 export interface PageResponse<T> {
   content: T[];
   empty: boolean;
@@ -38,6 +57,25 @@ export class TracksService {
   private readonly sort = signal<SortType>('name');
   private readonly filter = signal<string | undefined>(undefined);
   private readonly direction = signal<SortDirection>('asc');
+
+  async createTrack(request: TrackCreateRequest): Promise<TrackRecord> {
+    const response = await fetch('/api/tracks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const problem = await response.json().catch(() => ({})) as {
+        detail?: string;
+        fieldErrors?: Record<string, string>;
+      };
+      throw new TrackCreateError(problem.detail ?? 'TRACK_CREATE_FAILED', problem.fieldErrors ?? {});
+    }
+
+    return response.json();
+  }
+
   // public readonly pageData = rxResource<PageResponse<TrackRecord>, ResourceParams>({
   //   params: () => ({
   //     page: this.currentPage(),

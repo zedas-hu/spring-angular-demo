@@ -28,11 +28,9 @@
                     [checked]="tracksService.getDirection() === 'asc'" />{{ t('ASCENDING') }}</label>
             </app-popup>
 
-            <app-popup class="new" text="{{ t('NEW') }} +">
-                <label>
-                    <a class="tool" (click)="showNewAlbumDialog()">{{ t('ALBUM') }}</a>
-                </label>
-            </app-popup>
+            <div class="new">
+                <a class="text-button" (click)="showNewAlbumDialog()" >{{ t('NEW_ALBUM') }} ✚</a>
+            </div>
         }
     </header>
 
@@ -59,10 +57,7 @@
             @if (!tracksService.displayedPage() && pageResource.isLoading()) {
                 <tr><td colspan="5">{{ t('LOADING_TRACKS') }}</td></tr>
             }
-            @else if (pageResource.error(); as error) {
-                <tr><td colspan="5">
-                    <p role="alert">{{ t('LOAD_TRACKS_FAILED') }} {{ errorMessage(error) }}</p>
-                </td></tr>
+            @else if (pageResource.error()) {
             }
             @else if (tracksService.displayedPage(); as page) {
                 @if (page.content.length === 0) {

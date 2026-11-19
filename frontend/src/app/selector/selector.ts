@@ -1,6 +1,8 @@
-import { Component, effect, input, model, output, resource } from '@angular/core';
+import { Component, effect, inject, input, model, output, resource, untracked } from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
 import { KeyProvider, type KeyRecord } from '../keyprovider';
+import { TranslationService } from '../i18n/translation.service';
+import { MessagesService } from '../messages';
 
 @Component({
   imports: [],
@@ -9,6 +11,8 @@ import { KeyProvider, type KeyRecord } from '../keyprovider';
   templateUrl: './selector.html',
 })
 export class Selector implements FormValueControl<string> {
+  private readonly messages = inject(MessagesService);
+  private readonly translations = inject(TranslationService);
   readonly keyProvider = input<KeyProvider>();
   readonly inputId = input<string>();
   readonly keyList = resource<KeyRecord[], KeyProvider | undefined>({
@@ -29,6 +33,12 @@ export class Selector implements FormValueControl<string> {
       const keyList = this.keyList.value();
       this.key.set(keyList?.find(o => o.value === value.trim())?.key);
     });
+    effect(() => {
+      const error = this.keyList.error();
+      if (error) {
+        untracked(() => this.messages.error(this.translations.translate('KEY_FETCH_ERROR')));
+      }
+    });
   }
 
   onInput(event: Event): void {
@@ -41,7 +51,4 @@ export class Selector implements FormValueControl<string> {
     this.touch.emit();
   }
 
-  errorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
-  }
 }

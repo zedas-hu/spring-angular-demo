@@ -73,8 +73,8 @@ h6 {
   grid-template-rows: min-content 1fr min-content;
   grid-template-columns: 1fr;
   row-gap: 1rem;
-  width: min(500px, calc(100% - 32px));
-  height: min(500px, calc(100% - 32px));
+  width: min(500px, 100%);
+  /* height: min(500px, calc(100% - 32px)); */
 
   form {
     display: contents;
@@ -131,6 +131,7 @@ h6 {
     gap: 1rem;
     border-top: 1px solid var(--line-color);
     padding-top: 0.5rem;
+    margin-top: 1rem;
 
     button.text-button:disabled {
       color: var(--text-button-disabled);

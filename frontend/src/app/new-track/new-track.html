@@ -1,1 +1,116 @@
-<p>new-track works!</p>
+<dialog #dialog class="dialog-box" id="new-track-dialog">
+  <header><h1>{{ t('NEW_TRACK') }}</h1></header>
+
+  <form [formRoot]="trackForm">
+    <content>
+      <label for="track-name">{{ t('NAME') }}<br />
+        <input
+          id="track-name"
+          type="text"
+          [formField]="trackForm.name"
+          [attr.aria-invalid]="trackForm.name().touched() && trackForm.name().invalid()"
+        />
+      </label>
+      @if (trackForm.name().touched()) {
+        @for (error of trackForm.name().errors(); track $index) {
+          <p class="field-error" role="alert">{{ t(error.message!) }}</p>
+        }
+      }
+
+      <label for="track-genre">{{ t('GENRE') }}<br />
+        <select
+          id="track-genre"
+          [formField]="trackForm.genreId"
+          [attr.aria-invalid]="trackForm.genreId().touched() && trackForm.genreId().invalid()"
+        >
+          <option value="">{{ t('SELECT_GENRE') }}</option>
+          @if (options.hasValue()) {
+            @for (genre of options.value().genres; track genre.genreId) {
+              <option [value]="genre.genreId">{{ genre.name }}</option>
+            }
+          }
+        </select>
+      </label>
+      @if (trackForm.genreId().touched()) {
+        @for (error of trackForm.genreId().errors(); track $index) {
+          <p class="field-error" role="alert">{{ t(error.message!) }}</p>
+        }
+      }
+
+      <label for="track-media-type">{{ t('MEDIA_TYPE') }}<br />
+        <select
+          id="track-media-type"
+          [formField]="trackForm.mediaTypeId"
+          [attr.aria-invalid]="trackForm.mediaTypeId().touched() && trackForm.mediaTypeId().invalid()"
+        >
+          <option value="">{{ t('SELECT_MEDIA_TYPE') }}</option>
+          @if (options.hasValue()) {
+            @for (mediaType of options.value().mediaTypes; track mediaType.mediaTypeId) {
+              <option [value]="mediaType.mediaTypeId">{{ mediaType.name }}</option>
+            }
+          }
+        </select>
+      </label>
+      @if (trackForm.mediaTypeId().touched()) {
+        @for (error of trackForm.mediaTypeId().errors(); track $index) {
+          <p class="field-error" role="alert">{{ t(error.message!) }}</p>
+        }
+      }
+
+      <label for="track-composer">{{ t('COMPOSER') }}<br />
+        <input
+          id="track-composer"
+          type="text"
+          [formField]="trackForm.composer"
+          [attr.aria-invalid]="trackForm.composer().touched() && trackForm.composer().invalid()"
+        />
+      </label>
+      @if (trackForm.composer().touched()) {
+        @for (error of trackForm.composer().errors(); track $index) {
+          <p class="field-error" role="alert">{{ t(error.message!) }}</p>
+        }
+      }
+
+      <label for="track-duration">{{ t('DURATION') }}<br />
+        <input
+          id="track-duration"
+          type="text"
+          placeholder="3:45"
+          [formField]="trackForm.duration"
+          [attr.aria-invalid]="trackForm.duration().touched() && trackForm.duration().invalid()"
+        />
+      </label>
+      @if (trackForm.duration().touched()) {
+        @for (error of trackForm.duration().errors(); track $index) {
+          <p class="field-error" role="alert">{{ t(error.message!) }}</p>
+        }
+      }
+
+      <label for="track-unit-price">{{ t('UNIT_PRICE') }}<br />
+        <input
+          id="track-unit-price"
+          type="number"
+          step="0.01"
+          [formField]="trackForm.unitPrice"
+          [attr.aria-invalid]="trackForm.unitPrice().touched() && trackForm.unitPrice().invalid()"
+        />
+      </label>
+      @if (trackForm.unitPrice().touched()) {
+        @for (error of trackForm.unitPrice().errors(); track $index) {
+          <p class="field-error" role="alert">{{ t(error.message!) }}</p>
+        }
+      }
+
+      @if (options.isLoading()) {
+        <p>{{ t('LOADING_TRACK_OPTIONS') }}</p>
+      }
+    </content>
+
+    <footer>
+      <button type="submit" class="tool text-button" [disabled]="trackForm().invalid() || !options.hasValue()">
+        {{ t('CREATE') }}
+      </button>
+      <button type="button" class="tool text-button" (click)="close()">{{ t('CANCEL') }}</button>
+    </footer>
+  </form>
+</dialog>

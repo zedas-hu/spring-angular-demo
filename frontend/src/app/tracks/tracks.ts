@@ -1,8 +1,9 @@
-import { Component, inject, ViewChild, ElementRef, ViewContainerRef, ComponentRef } from '@angular/core';
+import { Component, effect, inject, untracked, ViewChild, ElementRef, ViewContainerRef, ComponentRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { formatDuration } from '../tools';
 import { NewAlbumComponent } from '../new-album/new-album';
 import { TranslationService, Translator } from '../i18n/translation.service';
+import { MessagesService } from '../messages';
 import { TracksService, SortType, SortDirection } from './tracks.service';
 import { Popup } from '../popup/popup';
 
@@ -17,14 +18,20 @@ export class Tracks {
   private readonly router = inject(Router);
   private readonly viewContainer = inject(ViewContainerRef);
   private readonly translations = inject(TranslationService);
+  private readonly messages = inject(MessagesService);
   private newAlbumDialog?: ComponentRef<NewAlbumComponent>;
 
   readonly pageResource = this.tracksService.pageData;
   readonly convertToMinutes = formatDuration;
   readonly t: Translator = this.translations.translate.bind(this.translations);
 
-  errorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
+  constructor() {
+    effect(() => {
+      const error = this.pageResource.error();
+      if (error) {
+        untracked(() => this.messages.error(this.t('LOAD_TRACKS_FAILED')));
+      }
+    });
   }
 
   previousPage(): void {

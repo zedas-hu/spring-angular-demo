@@ -1,8 +1,9 @@
-import { Component, ElementRef, viewChild, output, inject, signal } from '@angular/core';
+import { Component, effect, ElementRef, viewChild, output, inject, signal, untracked } from '@angular/core';
 import { form, FormField, FormRoot, required, validate, type FieldTree, type TreeValidationResult } from '@angular/forms/signals';
 import { AlbumCreateError, AlbumService } from '../album/album.service';
 import { TranslationService, Translator } from '../i18n/translation.service';
 import { KeyProvider } from '../keyprovider';
+import { MessagesService } from '../messages';
 import { Selector } from '../selector/selector';
 
 interface NewAlbumModel {
@@ -20,6 +21,7 @@ interface NewAlbumModel {
 export class NewAlbumComponent {
   private readonly albumService = inject(AlbumService);
   private readonly translations = inject(TranslationService);
+  private readonly messages = inject(MessagesService);
   private dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
   private readonly albumModel = signal<NewAlbumModel>({ title: '', artistName: '', artistId: null });
 
@@ -49,6 +51,17 @@ export class NewAlbumComponent {
     },
     { submission: { action: () => this.createAlbum() } },
   );
+
+  constructor() {
+    effect(() => {
+      const message = this.formError();
+      if (message) {
+        untracked(() => this.messages.error(
+          this.translations.translateError(message, 'ALBUM_CREATE_FAILED'),
+        ));
+      }
+    });
+  }
 
   setArtistId(artistId: number | undefined): void {
     this.albumModel.update((album) => ({ ...album, artistId: artistId ?? null }));

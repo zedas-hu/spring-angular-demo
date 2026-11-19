@@ -2,13 +2,8 @@
 
 - Search mező DOS-védelem
 
-- Új album csinosítása
-  - ... alj a mezőkön
-  - Ha nincs artist, warning, hogy új jön majd létre
-
-- Új track felvitele a lista végén
-  - Új track felvivő dialógus
-  - Dialógus egységesítés?
+- Track szerkesztés
+- Track törlés
 
 ## Bejelentkezés
 

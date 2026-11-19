@@ -38,9 +38,6 @@
       @if (albumForm.artistName().value().trim() && albumForm.artistId().value() === null) {
         <p class="field-warning" role="status">{{ t('ARTIST_WILL_BE_CREATED') }}</p>
       }
-      @if (formError(); as message) {
-        <p class="field-error" role="alert">{{ t(message) }}</p>
-      }
     </content>
 
     <footer>
