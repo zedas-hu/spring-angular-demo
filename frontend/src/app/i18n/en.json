@@ -4,6 +4,7 @@
   "ARTIST_NAME_REQUIRED": "Enter an artist name.",
   "ARTIST_NAME_TOO_LONG": "The artist name can be at most 120 characters.",
   "ARTIST_NOT_FOUND": "The selected artist could not be found. Please select it again or enter a new artist name.",
+  "ARTIST_WILL_BE_CREATED": "No existing artist has this name; a new artist will be created.",
   "TITLE_DUPLICATION": "An album with the same title already exists.",
   "INVALID_ALBUM_DATA": "The album data is invalid.",
   "ALBUM_CREATE_FAILED": "Could not create the album. Please try again.",

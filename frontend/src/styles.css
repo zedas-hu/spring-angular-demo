@@ -23,9 +23,11 @@ h6 {
 :root {
   --page-background: light-dark(white, black);
   --font-color: light-dark(black, white);
+  --font-color2: light-dark(grey, #848484);
   --line-color: light-dark(orange, lime);
   --line-color2: light-dark(grey, grey);
   --text-button-active: light-dark(gray, #a5ffa5);
+  --text-button-disabled: light-dark(gray, #8f8f8f);
   --text-button-color: light-dark(black, white);
   --button-background: light-dark(#e9dfce, #050);
   --button-hover: light-dark(#ededed, #008d00);
@@ -40,6 +42,8 @@ h6 {
   --popup-background: light-dark(#e9dfce, #050);
   --popup-color: light-dark(black, lime);
   --popup-hover: light-dark(grey, white);
+  --error_color: light-dark(maroon, #ff8989);
+  --warning_color: light-dark(#807a00, #fffb89);
 }
 
 .text-button {
@@ -56,7 +60,7 @@ h6 {
 
 .dialog-box {
   border: none;
-  border-radius: 12px;
+  border-radius: 0.5rem;
   padding: 1rem;
   max-height: 90dvh;
   overflow: auto;
@@ -64,6 +68,46 @@ h6 {
   grid-template-rows: min-content 1fr min-content;
   grid-template-columns: 1fr;
   row-gap: 1rem;
+  width: min(500px, calc(100% - 32px));
+  height: min(500px, calc(100% - 32px));
+
+  form {
+    display: contents;
+
+    p {
+      margin: 0;
+
+      &.field-error {
+        color: var(--error_color);
+        font-size: 1.2rem;
+        margin-top: 0.25rem;
+      }
+
+
+      &.field-warning {
+        color: var(--warning_color);
+        font-size: 1.2rem;
+        margin-top: 0.25rem;
+      }
+    }
+
+    label {
+      display: block;
+      color: var(--font-color2);
+      margin-top: 1.5rem;
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px dotted var(--line-color2);
+      outline: none;
+      font-size: 1.25rem;
+      margin-top: 0.25rem
+    }
+  }
 
   &::backdrop {
     background: rgb(0 0 0 / 50%);
@@ -73,6 +117,21 @@ h6 {
   &[open] {
     display: grid;
     animation: dialog-in 180ms ease-out;
+  }
+
+  footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid var(--line-color);
+    padding-top: 0.5rem;
+
+    button.text-button:disabled {
+      color: var(--text-button-disabled);
+      cursor: not-allowed;
+      opacity: 0.65;
+      text-decoration: none;
+    }
   }
 }
 
@@ -112,7 +171,7 @@ div.popup-box div.inner {
     display: block;
     text-align: center;
     margin: 0.5rem;
-    
+
     &:hover {
       color: var(--popup-hover);
       text-decoration: underline;

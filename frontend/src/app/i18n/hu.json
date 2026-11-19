@@ -4,6 +4,7 @@
   "ARTIST_NAME_REQUIRED": "Adj meg egy előadónevet.",
   "ARTIST_NAME_TOO_LONG": "Az előadó neve legfeljebb 120 karakter lehet.",
   "ARTIST_NOT_FOUND": "A kiválasztott előadó nem található. Válaszd ki újra, vagy adj meg új előadónevet.",
+  "ARTIST_WILL_BE_CREATED": "Nem található ilyen nevű előadó; új előadó jön létre.",
   "TITLE_DUPLICATION": "Már létezik album ugyanezzel a címmel.",
   "INVALID_ALBUM_DATA": "Az album adatai érvénytelenek.",
   "ALBUM_CREATE_FAILED": "Az album létrehozása nem sikerült. Próbáld újra.",

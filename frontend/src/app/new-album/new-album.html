@@ -3,41 +3,43 @@
   
   <form [formRoot]="albumForm">
     <content>
-      <label for="album-title">Album Title</label><br/>
-      <input
-        id="album-title"
-        type="text"
-        [formField]="albumForm.title"
-        [attr.aria-invalid]="albumForm.title().touched() && albumForm.title().invalid()"
-      ><br/>
+      <label for="album-title">Album Title<br/>
+        <input
+          id="album-title"
+          type="text"
+          [formField]="albumForm.title"
+          [attr.aria-invalid]="albumForm.title().touched() && albumForm.title().invalid()"
+        />
+      </label>
       @if (albumForm.title().touched()) {
         @for (error of albumForm.title().errors(); track $index) {
           <p class="field-error" role="alert">{{ t(error.message!) }}</p>
         }
       }
 
-      <label for="album-artist">Artist</label><br/>
-      <app-selector
-        inputId="album-artist"
-        [keyProvider]="artistKeyProvider"
-        [value]="albumForm.artistName().value()"
-        (valueChange)="setArtistName($event)"
-        (keyChange)="setArtistId($event)"
-        [ariaInvalid]="albumForm.artistName().touched() && albumForm.artistName().invalid()"
-      />
+      <label for="album-artist">Artist<br/>
+        <app-selector
+          [formField]="albumForm.artistName"
+          inputId="album-artist"
+          [keyProvider]="artistKeyProvider"
+          (keyChange)="setArtistId($event)"
+        />
+      </label>
       @if (albumForm.artistName().touched()) {
         @for (error of albumForm.artistName().errors(); track $index) {
           <p class="field-error" role="alert">{{ t(error.message!) }}</p>
         }
       }
-      
+      @if (albumForm.artistName().value().trim() && albumForm.artistId().value() === null) {
+        <p class="field-warning" role="status">{{ t('ARTIST_WILL_BE_CREATED') }}</p>
+      }
       @if (formError(); as message) {
         <p class="field-error" role="alert">{{ t(message) }}</p>
       }
     </content>
 
     <footer>
-      <button type="submit" class="tool text-button">Create</button>
+      <button type="submit" class="tool text-button" [disabled]="albumForm().invalid()">Create</button>
       <button type="button" class="tool text-button" commandfor="new-album-dialog" command="close">Cancel</button>
     </footer>
   </form>

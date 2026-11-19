@@ -1,5 +1,5 @@
 import { Component, ElementRef, viewChild, output, inject, signal } from '@angular/core';
-import { form, FormField, FormRoot, required, type FieldTree, type TreeValidationResult } from '@angular/forms/signals';
+import { form, FormField, FormRoot, required, validate, type FieldTree, type TreeValidationResult } from '@angular/forms/signals';
 import { AlbumCreateError, AlbumService } from '../album/album.service';
 import { TranslationService, Translator } from '../i18n/translation.service';
 import { KeyProvider } from '../keyprovider';
@@ -15,8 +15,7 @@ interface NewAlbumModel {
   selector: 'app-new-album',
   standalone: true,
   imports: [FormField, FormRoot, Selector],
-  templateUrl: './new-album.html',
-  styleUrls: ['./new-album.css']
+  templateUrl: './new-album.html'
 })
 export class NewAlbumComponent {
   private readonly albumService = inject(AlbumService);
@@ -38,13 +37,15 @@ export class NewAlbumComponent {
     (path) => {
       required(path.title, { message: 'TITLE_REQUIRED' });
       required(path.artistName, { message: 'ARTIST_NAME_REQUIRED' });
+      validate(path.artistName, ({ value }) => {
+        const artistName = value();
+        return artistName.length > 0 && artistName.trim().length === 0
+          ? { kind: 'required', message: 'ARTIST_NAME_REQUIRED' }
+          : undefined;
+      });
     },
     { submission: { action: () => this.createAlbum() } },
   );
-
-  setArtistName(artistName: string): void {
-    this.albumModel.update((album) => ({ ...album, artistName }));
-  }
 
   setArtistId(artistId: number | undefined): void {
     this.albumModel.update((album) => ({ ...album, artistId: artistId ?? null }));
@@ -57,7 +58,7 @@ export class NewAlbumComponent {
     try {
       const album = await this.albumService.createAlbum({
         title,
-        artistName,
+        artistName: artistName.trim(),
         artistId,
       });
       this.created.emit(album.albumId);

@@ -1,4 +1,5 @@
-import { Component, effect, input, model, resource } from '@angular/core';
+import { Component, effect, input, model, output, resource } from '@angular/core';
+import { FormValueControl } from '@angular/forms/signals';
 import { KeyProvider, type KeyRecord } from '../keyprovider';
 
 @Component({
@@ -7,10 +8,9 @@ import { KeyProvider, type KeyRecord } from '../keyprovider';
   styleUrl: './selector.css',
   templateUrl: './selector.html',
 })
-export class Selector {
+export class Selector implements FormValueControl<string> {
   readonly keyProvider = input<KeyProvider>();
   readonly inputId = input<string>();
-  readonly ariaInvalid = input(false);
   readonly keyList = resource<KeyRecord[], KeyProvider | undefined>({
     params: () => this.keyProvider(),
     loader: async ({ params }) => params?.getKeyList() ?? [],
@@ -18,19 +18,27 @@ export class Selector {
   readonly uniqueId = crypto.randomUUID();
   readonly key = model<number | undefined>(undefined);
   readonly value = model('');
+  readonly touched = input(false);
+  readonly invalid = input(false);
+  readonly required = input(false);
+  readonly touch = output<void>();
 
   constructor() {
     effect(() => {
       const value = this.value();
       const keyList = this.keyList.value();
-      this.key.set(keyList?.find(o => o.value === value)?.key);
+      this.key.set(keyList?.find(o => o.value === value.trim())?.key);
     });
   }
 
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.value.set(value);
-    this.key.set(this.keyList.value()?.find(o => o.value === value)?.key);
+    this.key.set(this.keyList.value()?.find(o => o.value === value.trim())?.key);
+  }
+
+  onBlur(): void {
+    this.touch.emit();
   }
 
   errorMessage(error: unknown): string {

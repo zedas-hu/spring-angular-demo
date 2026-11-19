@@ -17,6 +17,7 @@ describe('NewAlbumComponent', () => {
     input.dispatchEvent(new Event('input'));
   };
   const submit = async () => {
+    fixture.detectChanges();
     (fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement).click();
     await new Promise(resolve => setTimeout(resolve));
     fixture.detectChanges();
@@ -58,12 +59,15 @@ describe('NewAlbumComponent', () => {
 
     typeInto('album-title', 'New');
     typeInto('album-artist', 'Artist');
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement).disabled).toBe(false);
     await submit();
 
     expect(fetchMock).toHaveBeenCalledWith('/api/albums', expect.objectContaining({
       method: 'POST',
       body: JSON.stringify({ title: 'New', artistName: 'Artist', artistId: 3 }),
     }));
+    expect(fixture.nativeElement.querySelector('.field-warning')).toBeNull();
     expect(created).toHaveBeenCalledWith(9);
   });
 
@@ -76,6 +80,9 @@ describe('NewAlbumComponent', () => {
       method: 'POST',
       body: JSON.stringify({ title: 'New', artistName: 'A new artist', artistId: null }),
     }));
+    expect(fixture.nativeElement.querySelector('.field-warning').textContent).toContain(
+      'No existing artist has this name; a new artist will be created.',
+    );
   });
 
   it('shows server field errors next to the matching field', async () => {
@@ -95,10 +102,38 @@ describe('NewAlbumComponent', () => {
   });
 
   it('does not call the API until the required fields are filled', async () => {
+    const titleInput = fixture.nativeElement.querySelector('#album-title') as HTMLInputElement;
+    const artistInput = fixture.nativeElement.querySelector('#album-artist') as HTMLInputElement;
+    titleInput.dispatchEvent(new Event('blur'));
+    artistInput.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
     await submit();
 
     expect(fetchMock).toHaveBeenCalledWith('/api/artists/keys');
     expect(fetchMock).not.toHaveBeenCalledWith('/api/albums', expect.anything());
+    expect((fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement).disabled).toBe(true);
     expect(fixture.nativeElement.querySelectorAll('.field-error').length).toBe(2);
+  });
+
+  it('shows an artist error when only whitespace is entered', async () => {
+    typeInto('album-title', 'New');
+    typeInto('album-artist', '   ');
+    (fixture.nativeElement.querySelector('#album-artist') as HTMLInputElement).dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    await submit();
+
+    expect(fetchMock).not.toHaveBeenCalledWith('/api/albums', expect.anything());
+    expect(fixture.nativeElement.querySelectorAll('.field-error').length).toBe(1);
+    expect(fixture.nativeElement.querySelectorAll('.field-error')[0].textContent).toContain('Enter an artist name.');
+  });
+
+  it('shows the required artist error after an empty artist field is blurred', () => {
+    const artistInput = fixture.nativeElement.querySelector('#album-artist') as HTMLInputElement;
+    artistInput.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.field-error').length).toBe(1);
+    expect(fixture.nativeElement.querySelector('.field-error').textContent).toContain('Enter an artist name.');
+    expect(artistInput.getAttribute('aria-invalid')).toBe('true');
   });
 });

@@ -2,11 +2,13 @@
 
 - Search mező DOS-védelem
 
-- New album kódokat átnézni
-  - Meglévő artist beírása, vagy új kiválasztása
-  - Selector kontrol
-- Lista / Id kontroll
+- Új album csinosítása
+  - ... alj a mezőkön
+  - Ha nincs artist, warning, hogy új jön majd létre
+
 - Új track felvitele a lista végén
+  - Új track felvivő dialógus
+  - Dialógus egységesítés?
 
 ## Bejelentkezés
 
@@ -24,7 +26,6 @@ This is a demo project based on the "chinook" sqlite tutorial database.
 (Availabe from https://www.sqlitetutorial.net/sqlite-sample-database/)
 
 Angular frontend with language change, dark/light theme, search, paging, 
-
 
 Verziók
 Spring
