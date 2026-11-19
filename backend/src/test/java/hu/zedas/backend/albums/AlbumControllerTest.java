@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import hu.zedas.backend.artists.ArtistRepository;
+import hu.zedas.backend.tracks.TrackRepository;
 
 @SpringBootTest
 class AlbumControllerTest {
@@ -20,6 +21,9 @@ class AlbumControllerTest {
 
     @Autowired
     private ArtistRepository artistRepository;
+
+    @Autowired
+    private TrackRepository trackRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -111,5 +115,21 @@ class AlbumControllerTest {
         request.setTitle(albumController.getAllAlbums().get(0).title());
 
         assertThrows(BusinessValidationException.class, () -> albumController.createAlbum(request));
+    }
+
+    @Test
+    @Transactional
+    void deletesAlbumAndItsTracks() {
+        var album = albumController.getAllAlbums().stream()
+                .filter(candidate -> !candidate.tracks().isEmpty())
+                .findFirst()
+                .orElseThrow();
+        var trackIds = album.tracks().stream().map(track -> track.trackId()).toList();
+
+        var response = albumController.deleteAlbum(album.albumId());
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertFalse(albumRepository.existsById(album.albumId()));
+        assertFalse(trackIds.stream().anyMatch(trackRepository::existsById));
     }
 }

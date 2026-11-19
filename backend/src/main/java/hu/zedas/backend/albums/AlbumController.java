@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,16 +17,19 @@ import hu.zedas.backend.artists.ArtistEntity;
 import hu.zedas.backend.artists.ArtistRepository;
 import org.springframework.transaction.annotation.Transactional;
 import hu.zedas.backend.KeyResponse;
+import hu.zedas.backend.tracks.TrackRepository;
 
 @RestController
 @RequestMapping("/api/albums")
 public class AlbumController {
     private final AlbumRepository albumRepository;
     private final ArtistRepository artistRepository;
+    private final TrackRepository trackRepository;
 
-    public AlbumController(AlbumRepository albumRepository, ArtistRepository artistRepository) {
+    public AlbumController(AlbumRepository albumRepository, ArtistRepository artistRepository, TrackRepository trackRepository) {
         this.albumRepository = albumRepository;
         this.artistRepository = artistRepository;
+        this.trackRepository = trackRepository;
     }
 
     @GetMapping
@@ -44,6 +48,18 @@ public class AlbumController {
     public AlbumResponse getAlbumById(@PathVariable Integer id) {
         return AlbumMapper.INSTANCE.toResponse(albumRepository.findById(id).orElseThrow(
             () -> new IllegalArgumentException("Album not found")));
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<Void> deleteAlbum(@PathVariable Integer id) {
+        if (!albumRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        trackRepository.deleteByAlbum_AlbumId(id);
+        albumRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping

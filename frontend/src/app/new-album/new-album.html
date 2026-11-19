@@ -16,6 +16,11 @@
           <p class="field-error" role="alert">{{ t(error.message!) }}</p>
         }
       }
+      @if (duplicateAlbumId()) {
+        <button type="button" class="tool text-button small existing-album-button" (click)="openExistingAlbum()">
+          {{ t('OPEN_EXISTING_ALBUM') }}
+        </button>
+      }
 
       <label for="album-artist">Artist<br/>
         <app-selector

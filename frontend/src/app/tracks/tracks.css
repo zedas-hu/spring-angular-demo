@@ -102,6 +102,12 @@ main {
                         padding: 0.5rem;
                         height: 3rem;
 
+                        &.empty {
+                            grid-column: 1 / -1;
+                            text-align: center;
+                            color: var(--font-color2);
+                        }
+
                         span.artist {
                             color: var(--sub-color);
                             font-size: 0.95rem;

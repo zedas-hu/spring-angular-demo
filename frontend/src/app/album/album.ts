@@ -1,6 +1,6 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { formatDuration } from '../tools';
 import { TranslationService, Translator } from '../i18n/translation.service';
 import { AlbumService } from './album.service';
@@ -14,6 +14,7 @@ import { AlbumService } from './album.service';
 export class Album {
   private readonly albumService = inject(AlbumService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly translations = inject(TranslationService);
   private readonly routeParams = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
@@ -28,10 +29,29 @@ export class Album {
   readonly pageResource = this.albumService.pageData;
   readonly convertToMinutes = formatDuration;
   readonly t: Translator = this.translations.translate.bind(this.translations);
+  readonly deleteError = signal<string | null>(null);
 
   constructor() {
     this.syncAlbum();
     effect(() => this.syncAlbum());
+  }
+
+  async deleteAlbum(): Promise<void> {
+    const albumId = this.selectedAlbumId();
+    if (albumId === null || !window.confirm(this.t('DELETE_ALBUM_CONFIRM'))) {
+      return;
+    }
+
+    this.deleteError.set(null);
+    try {
+      await this.albumService.deleteAlbum(albumId);
+      await this.router.navigate(['/tracks']);
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
+      }
+      this.deleteError.set('ALBUM_DELETE_FAILED');
+    }
   }
 
   private syncAlbum(): void {

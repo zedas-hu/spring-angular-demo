@@ -61,6 +61,25 @@ describe('Tracks', () => {
     expect(params.get('sort')).toBe('name,desc');
   });
 
+  it('shows a message when there are no track records', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('tbody td.empty').textContent).toContain('No records.');
+  });
+
+  it('hides the page number when the page count is zero', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ ...pageResponse(0, true), totalElements: 0, totalPages: 0 }),
+    });
+    TestBed.inject(TracksService).setFilter('empty');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.pager span')).toBeNull();
+  });
+
   it('requests the next page through the service pager', async () => {
     await fixture.whenStable();
     fixture.detectChanges();
@@ -120,6 +139,12 @@ describe('Tracks', () => {
       fixture.debugElement.query(By.directive(NewAlbumComponent)).componentInstance.created.emit(7);
 
       expect(navigate).toHaveBeenCalledWith(['/albums', 7]);
+      expect(fixture.nativeElement.querySelector('app-new-album')).toBeNull();
+
+      component.showNewAlbumDialog();
+      fixture.debugElement.query(By.directive(NewAlbumComponent)).componentInstance.existingAlbum.emit(8);
+
+      expect(navigate).toHaveBeenCalledWith(['/albums', 8]);
       expect(fixture.nativeElement.querySelector('app-new-album')).toBeNull();
     } finally {
       HTMLDialogElement.prototype.showModal = showModal;

@@ -28,6 +28,9 @@ describe('NewAlbumComponent', () => {
       if (url === '/api/artists/keys') {
         return jsonResponse(200, [{ key: 3, value: 'Artist' }]);
       }
+      if (url === '/api/albums/keys') {
+        return jsonResponse(200, [{ key: 9, value: 'New' }]);
+      }
       return jsonResponse(201, {
         albumId: 9,
         title: 'New',
@@ -86,19 +89,31 @@ describe('NewAlbumComponent', () => {
   });
 
   it('shows server field errors next to the matching field', async () => {
-    fetchMock.mockResolvedValue(jsonResponse(409, {
-      detail: 'TITLE_DUPLICATION',
-      fieldErrors: { title: 'TITLE_DUPLICATION' },
-    }));
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url === '/api/albums/keys') {
+        return jsonResponse(200, [{ key: 9, value: 'New' }]);
+      }
+      return jsonResponse(409, {
+        detail: 'TITLE_DUPLICATION',
+        fieldErrors: { title: 'TITLE_DUPLICATION' },
+      });
+    });
 
     typeInto('album-title', 'New');
     typeInto('album-artist', 'Artist');
+    const existingAlbum = vi.fn();
+    fixture.componentInstance.existingAlbum.subscribe(existingAlbum);
     await submit();
 
     const errors = fixture.nativeElement.querySelectorAll('.field-error');
     expect(errors.length).toBe(1);
     expect(errors[0].textContent).toContain('An album with the same title already exists.');
+    expect(fetchMock).toHaveBeenCalledWith('/api/albums/keys');
     expect(fixture.nativeElement.querySelector('#album-title').getAttribute('aria-invalid')).toBe('true');
+    const openExistingButton = fixture.nativeElement.querySelector('.existing-album-button') as HTMLButtonElement;
+    expect(openExistingButton.textContent).toContain('Open existing album');
+    openExistingButton.click();
+    expect(existingAlbum).toHaveBeenCalledWith(9);
   });
 
   it('does not call the API until the required fields are filled', async () => {

@@ -81,4 +81,12 @@ export class AlbumService {
   setCurrentAlbum(albumId: number | null): void {
     this.currentAlbum.set(albumId);
   }
+
+  async deleteAlbum(albumId: number): Promise<void> {
+    const response = await fetch(`/api/albums/${albumId}`, { method: 'DELETE' });
+
+    if (!response.ok) {
+      throw new Error('ALBUM_DELETE_FAILED');
+    }
+  }
 }

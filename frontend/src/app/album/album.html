@@ -13,9 +13,16 @@
       <h1>♪ {{ page.title }}</h1>
 
       <div class="back">
-        <a class="text-button" [routerLink]="['/tracks']">{{ t('BACK') }}</a>
+        <a class="text-button" (click)="deleteAlbum()" >{{ t('DELETE') }} 🗙</a>
+      </div>
+
+      <div class="back">
+        <a class="text-button" [routerLink]="['/tracks']">{{ t('BACK') }} ↩</a>
       </div>
     </header>
+    @if (deleteError(); as error) {
+      <p role="alert">{{ t(error) }}</p>
+    }
     
     <header class="sub-header">
       <h2>{{ page.artistName }}</h2>

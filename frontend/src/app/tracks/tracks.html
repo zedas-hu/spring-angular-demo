@@ -65,26 +65,32 @@
                 </td></tr>
             }
             @else if (tracksService.displayedPage(); as page) {
-                @for (track of page.content; track track.trackId) {
-                    <tr>
-                        <td class="name">{{ track.name }}<br/>
-                            <span class="artist">{{ track.artistName }}</span>
-                        </td>
-                        <td class="album text-button" (click)="navigateToAlbum(track.albumId)">{{ track.albumTitle }}</td>
-                        <td class="genre">{{ track.genreName }}</td>
-                        <td class="length">{{ convertToMinutes(track.milliseconds) }}</td>
-                    </tr>
+                @if (page.content.length === 0) {
+                    <tr><td class="empty" colspan="4">{{ t('NO_RECORDS') }}</td></tr>
+                } @else {
+                    @for (track of page.content; track track.trackId) {
+                        <tr>
+                            <td class="name">{{ track.name }}<br/>
+                                <span class="artist">{{ track.artistName }}</span>
+                            </td>
+                            <td class="album text-button" (click)="navigateToAlbum(track.albumId)">{{ track.albumTitle }}</td>
+                            <td class="genre">{{ track.genreName }}</td>
+                            <td class="length">{{ convertToMinutes(track.milliseconds) }}</td>
+                        </tr>
+                    }
                 }
             }
             </tbody>
         </table>
     </content>
 
-    <footer>
+    <footer class="pager">
     @if (tracksService.displayedPage(); as page) {
         <button class="mover" (click)="firstPage()" [disabled]="page.first">❮❮</button>
         <button class="mover" (click)="previousPage()" [disabled]="page.first">❮</button>
-        <span>{{ t('PAGE_OF', page.number + 1, page.totalPages) }}</span>
+        <span>
+        @if (page.totalPages > 0) {{{ t('PAGE_OF', page.number + 1, page.totalPages) }}}
+        </span>
         <button class="mover" (click)="nextPage()" [disabled]="page.last">❯</button>
         <button class="mover" (click)="lastPage()" [disabled]="page.last">❯❯</button>
     }

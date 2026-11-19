@@ -70,6 +70,10 @@ export class Tracks {
         this.destroyNewAlbumDialog();
         this.navigateToAlbum(albumId);
       });
+      dialog.instance.existingAlbum.subscribe(albumId => {
+        this.destroyNewAlbumDialog();
+        this.navigateToAlbum(albumId);
+      });
       this.newAlbumDialog = dialog;
     }
     this.newAlbumDialog.instance.open();

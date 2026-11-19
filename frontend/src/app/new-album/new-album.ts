@@ -25,9 +25,12 @@ export class NewAlbumComponent {
 
   closed = output<void>();
   created = output<number>();
+  existingAlbum = output<number>();
 
   readonly formError = signal<string | null>(null);
+  readonly duplicateAlbumId = signal<number | null>(null);
   readonly artistKeyProvider = new KeyProvider('artists');
+  private readonly albumKeyProvider = new KeyProvider('albums');
 
   // readonly t = (code?: string) => this.translations.translate(code ?? '');
   readonly t: Translator = this.translations.translate.bind(this.translations);
@@ -54,6 +57,7 @@ export class NewAlbumComponent {
   private async createAlbum(): Promise<TreeValidationResult> {
     const { title, artistName, artistId } = this.albumForm().value();
     this.formError.set(null);
+    this.duplicateAlbumId.set(null);
 
     try {
       const album = await this.albumService.createAlbum({
@@ -69,6 +73,18 @@ export class NewAlbumComponent {
         return undefined;
       }
 
+      if (error.detail === 'TITLE_DUPLICATION') {
+        try {
+          const albums = await this.albumKeyProvider.getKeyList();
+          this.duplicateAlbumId.set(albums.find((album) => album.value === title)?.key ?? null);
+        } catch (lookupError) {
+          if (!(lookupError instanceof Error)) {
+            throw lookupError;
+          }
+          this.formError.set('ALBUM_LOOKUP_FAILED');
+        }
+      }
+
       const fields: Record<string, FieldTree<string>> = {
         title: this.albumForm.title,
         artistName: this.albumForm.artistName,
@@ -82,6 +98,13 @@ export class NewAlbumComponent {
       }
       this.formError.set(error.detail);
       return undefined;
+    }
+  }
+
+  openExistingAlbum(): void {
+    const albumId = this.duplicateAlbumId();
+    if (albumId !== null) {
+      this.existingAlbum.emit(albumId);
     }
   }
 
