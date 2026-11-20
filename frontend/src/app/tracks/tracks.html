@@ -41,15 +41,15 @@
             <thead>
                 <tr>
                     <th>
-                        <span class="title text-button" (click)="setOrder('name')">{{ t('NAME') }}</span>
+                        <a class="title tool text-button" (click)="setOrder('name')">{{ t('NAME') }}</a>
                         <span class="direction">@if (tracksService.getSort() === 'name' && tracksService.getDirection() === 'asc') {⏷} @else if (tracksService.getSort() === 'name' && tracksService.getDirection() === 'desc') {⏶}</span>
                     </th>
                     <th>
-                        <span class="title text-button" (click)="setOrder('albumTitle')">{{ t('ALBUM') }}</span>
+                        <a class="title tool text-button" (click)="setOrder('albumTitle')">{{ t('ALBUM') }}</a>
                         <span class="direction">@if (tracksService.getSort() === 'albumTitle' && tracksService.getDirection() === 'asc') {⏷} @else if (tracksService.getSort() === 'albumTitle' && tracksService.getDirection() === 'desc') {⏶}</span>
                     </th>
                     <th>
-                        <span class="title text-button" (click)="setOrder('genreName')">{{ t('GENRE') }}</span>
+                        <a class="title tool text-button" (click)="setOrder('genreName')">{{ t('GENRE') }}</a>
                         <span class="direction">@if (tracksService.getSort() === 'genreName' && tracksService.getDirection() === 'asc') {⏷} @else if (tracksService.getSort() === 'genreName' && tracksService.getDirection() === 'desc') {⏶}</span>
                     </th>
                     <th style="text-align: right;">◷</th>
@@ -71,7 +71,7 @@
                             <td class="name">{{ track.name }}<br/>
                                 <span class="artist">{{ track.artistName }}</span>
                             </td>
-                            <td class="album text-button" (click)="navigateToAlbum(track.albumId)">{{ track.albumTitle }}</td>
+                            <td class="album"><a class="text-button" (click)="navigateToAlbum(track.albumId)">{{ track.albumTitle }}</a></td>
                             <td class="genre">{{ track.genreName }}</td>
                             <td class="length">{{ convertToMinutes(track.milliseconds) }}</td>
                         </tr>

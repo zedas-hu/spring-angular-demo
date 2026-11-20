@@ -75,10 +75,13 @@ main {
                     th {
                         text-align: left;
                         border-bottom: 1.5px solid var(--line-color);
-                        padding-bottom: 1rem;
+                        padding-bottom: 1.5rem;
                         margin-bottom: 1rem;
-                        font-size: 85%;
                         height: 1rem;
+
+                        a {
+                            font-size: 1.25rem;
+                        }
 
                         span.direction {
                             margin-left: 0.5rem;
@@ -113,7 +116,7 @@ main {
                             font-size: 0.95rem;
                         }
 
-                        &.album {
+                        &.album a {
                             font-size: 1rem;
                         }
 
@@ -143,7 +146,7 @@ main {
         gap: 0.5rem;
         padding: 0 0.5rem;
         border-top: 1.5px solid var(--line-color);
-        margin-top: 1rem;
+        margin-top: 1.5rem;
         padding-top: 1rem;
 
         button.mover {
