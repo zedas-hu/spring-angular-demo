@@ -2,21 +2,31 @@ package hu.zedas.backend.tracks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 import org.mockito.Mockito;
 import hu.zedas.backend.albums.AlbumRepository;
@@ -70,6 +80,30 @@ class TrackControllerTest {
         verify(tracksRepository, never())
                 .findByNameContainingIgnoreCaseOrAlbum_TitleContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(
                         anyString(), anyString(), anyString(), eq(pageable));
+    }
+
+    @Test
+    void returnsTrackPagesAsPagedModelWithPageMetadata() throws Exception {
+        TrackEntity entity = new TrackEntity();
+        TrackResponse response = new TrackResponse(1, "Track", 2, "Album", "Artist", 3, "Rock", 4,
+                "MPEG audio file", null, 1000, null, BigDecimal.ONE);
+        when(tracksRepository.findAll(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(entity), PageRequest.of(0, 20), 1));
+        when(trackMapper.toResponse(entity)).thenReturn(response);
+
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(trackController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build();
+
+        mockMvc.perform(get("/api/tracks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].trackId").value(1))
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalPages").value(1))
+                .andExpect(jsonPath("$.totalPages").doesNotExist());
     }
 
     @Test

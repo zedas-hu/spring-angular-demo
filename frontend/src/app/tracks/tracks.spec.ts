@@ -6,7 +6,7 @@ import { Mock, vi } from 'vitest';
 import { provideRouter, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Tracks } from './tracks';
-import { PageResponse, TrackRecord, TracksService } from './tracks.service';
+import { PagedModel, TrackRecord, TracksService } from './tracks.service';
 import { NewAlbumComponent } from '../new-album/new-album';
 import { LoginService } from '../login/login.service';
 import { ApiStubHandler, provideApiStub } from '../testing/api-stub';
@@ -16,15 +16,14 @@ describe('Tracks', () => {
   let fixture: ComponentFixture<Tracks>;
   let apiMock: Mock<ApiStubHandler>;
   let hasSession: WritableSignal<boolean>;
-  const pageResponse = (number: number, last: boolean): PageResponse<TrackRecord> => ({
+  const pageResponse = (number: number, last: boolean): PagedModel<TrackRecord> => ({
     content: [],
-    empty: true,
-    first: number === 0,
-    last,
-    number,
-    numberOfElements: 0,
-    totalElements: last ? number * TracksService.pageSize : (number + 2) * TracksService.pageSize,
-    totalPages: last ? number + 1 : number + 2,
+    page: {
+      size: TracksService.pageSize,
+      number,
+      totalElements: last ? number * TracksService.pageSize : (number + 2) * TracksService.pageSize,
+      totalPages: last ? number + 1 : number + 2,
+    },
   });
   const lastRequestParams = (): HttpParams => {
     const [request] = apiMock.mock.calls.at(-1)! as [HttpRequest<unknown>];
@@ -85,7 +84,7 @@ describe('Tracks', () => {
   });
 
   it('hides the page number when the page count is zero', async () => {
-    apiMock.mockReturnValue({ body: { ...pageResponse(0, true), totalElements: 0, totalPages: 0 } });
+    apiMock.mockReturnValue({ body: { content: [], page: { size: TracksService.pageSize, number: 0, totalElements: 0, totalPages: 0 } } });
     TestBed.inject(TracksService).setFilter('empty');
     await fixture.whenStable();
     fixture.detectChanges();
@@ -102,7 +101,7 @@ describe('Tracks', () => {
 
     expect(lastRequestParams().get('page')).toBe('1');
     expect(lastRequestParams().get('sort')).toBe('name,desc');
-    expect(component.pageResource.value()?.number).toBe(1);
+    expect(component.pageResource.value()?.page.number).toBe(1);
   });
 
   it('aborts the previous search request when the filter changes while loading', async () => {

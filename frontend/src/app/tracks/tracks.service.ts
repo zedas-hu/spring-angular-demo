@@ -26,16 +26,18 @@ export interface TrackCreateRequest {
   unitPrice: number;
 }
 
-export interface PageResponse<T> {
+export interface PagedModel<T> {
   content: T[];
-  empty: boolean;
-  first: boolean;
-  last: boolean;
-  number: number;
-  numberOfElements: number;
-  totalElements: number;
-  totalPages: number;
+  page: {
+    size: number;
+    number: number;
+    totalElements: number;
+    totalPages: number;
+  };
 }
+
+export const isFirstPage = (paged: PagedModel<unknown>): boolean => paged.page.number === 0;
+export const isLastPage = (paged: PagedModel<unknown>): boolean => paged.page.number >= paged.page.totalPages - 1;
 
 export type SortType = 'name' | 'albumTitle' | 'genreName' | 'mediaTypeName' | 'composer' | 'milliseconds' | 'albumArtistName';
 export type SortDirection = 'asc' | 'desc';
@@ -70,7 +72,7 @@ export class TracksService {
     });
   }
 
-  readonly pageData = resource<PageResponse<TrackRecord>, Record<string, string>>({
+  readonly pageData = resource<PagedModel<TrackRecord>, Record<string, string>>({
     params: () => ({
       page: String(this.currentPage()),
       size: String(TracksService.pageSize),
@@ -78,20 +80,20 @@ export class TracksService {
       filter: this.filter() ?? '',
     }),
     loader: async ({ params, abortSignal }) => {
-      const page = await this.api.request<PageResponse<TrackRecord>>('GET', '/api/tracks', {
+      const paged = await this.api.request<PagedModel<TrackRecord>>('GET', '/api/tracks', {
         params,
         signal: abortSignal,
         fallbackError: 'TRACKS_FETCH_ERROR',
       });
-      if (page.number > 0 && page.number >= page.totalPages) {
-        this.currentPage.set(Math.max(0, page.totalPages - 1));
+      if (paged.page.number > 0 && paged.page.number >= paged.page.totalPages) {
+        this.currentPage.set(Math.max(0, paged.page.totalPages - 1));
       }
-      return page;
+      return paged;
     },
   });
   readonly displayedPage = linkedSignal<
-    PageResponse<TrackRecord> | undefined,
-    PageResponse<TrackRecord> | undefined
+    PagedModel<TrackRecord> | undefined,
+    PagedModel<TrackRecord> | undefined
   >({
     source: () => this.pageData.hasValue() ? this.pageData.value() : undefined,
     computation: (page, previous) => page ?? previous?.value,
@@ -126,7 +128,7 @@ export class TracksService {
   }
 
   nextPage(): void {
-    if (!this.pageData.isLoading() && this.pageData.hasValue() && !this.pageData.value().last) {
+    if (!this.pageData.isLoading() && this.pageData.hasValue() && !isLastPage(this.pageData.value())) {
       this.currentPage.update((page) => page + 1);
     }
   }

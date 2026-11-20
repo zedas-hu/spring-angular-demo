@@ -9,9 +9,9 @@ import hu.zedas.backend.albums.AlbumRepository;
 import hu.zedas.backend.albums.LogicValidationException;
 import hu.zedas.backend.genres.GenreRepository;
 import hu.zedas.backend.media_types.MediaTypeRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedModel;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -127,7 +127,7 @@ public class TrackController {
     }
 
     @GetMapping
-    public Page<TrackResponse> getAllTracks(
+    public PagedModel<TrackResponse> getAllTracks(
             @RequestParam(required = false) String filter,
             @PageableDefault(size = 20, sort = { "name" }, direction = Sort.Direction.ASC) Pageable pageable) {
         if (pageable.getSort().stream().anyMatch(order -> {
@@ -140,12 +140,12 @@ public class TrackController {
 
         String normalizedFilter = filter == null ? null : filter.strip();
         if (normalizedFilter != null && normalizedFilter.length() >= 2)
-            return tracksRepository
+            return new PagedModel<>(tracksRepository
                     .findByNameContainingIgnoreCaseOrAlbum_TitleContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(
                             normalizedFilter, normalizedFilter, normalizedFilter, pageable)
-                    .map(trackMapper::toResponse);
+                    .map(trackMapper::toResponse));
 
-        return tracksRepository.findAll(pageable).map(trackMapper::toResponse);
+        return new PagedModel<>(tracksRepository.findAll(pageable).map(trackMapper::toResponse));
     }
 
     @GetMapping("/{id}")

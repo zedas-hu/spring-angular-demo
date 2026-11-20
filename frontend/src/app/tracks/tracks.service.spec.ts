@@ -2,17 +2,11 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { PageResponse, TrackCreateRequest, TracksService } from './tracks.service';
+import { PagedModel, TrackCreateRequest, TracksService } from './tracks.service';
 
-const emptyPage: PageResponse<never> = {
+const emptyPage: PagedModel<never> = {
   content: [],
-  empty: true,
-  first: true,
-  last: true,
-  number: 0,
-  numberOfElements: 0,
-  totalElements: 0,
-  totalPages: 0,
+  page: { size: 10, number: 0, totalElements: 0, totalPages: 0 },
 };
 
 describe('TracksService', () => {
@@ -90,13 +84,7 @@ describe('TracksService', () => {
 
     http.expectOne((req) => trackPagesUrl(req) && req.params.get('page') === '2').flush({
       content: [],
-      empty: true,
-      first: false,
-      last: true,
-      number: 2,
-      numberOfElements: 0,
-      totalElements: 2,
-      totalPages: 2,
+      page: { size: 10, number: 2, totalElements: 2, totalPages: 2 },
     });
 
     await vi.waitFor(() => expect(service.getCurrentPage()).toBe(1));
@@ -104,13 +92,7 @@ describe('TracksService', () => {
     TestBed.tick();
     http.expectOne((req) => trackPagesUrl(req) && req.params.get('page') === '1').flush({
       content: [{ trackId: 1 }],
-      empty: false,
-      first: false,
-      last: true,
-      number: 1,
-      numberOfElements: 1,
-      totalElements: 2,
-      totalPages: 2,
+      page: { size: 10, number: 1, totalElements: 2, totalPages: 2 },
     });
   });
 
@@ -118,13 +100,7 @@ describe('TracksService', () => {
     TestBed.tick();
     http.expectOne(trackPagesUrl).flush({
       content: [{ trackId: 1 }],
-      empty: false,
-      first: true,
-      last: true,
-      number: 0,
-      numberOfElements: 1,
-      totalElements: 1,
-      totalPages: 1,
+      page: { size: 10, number: 0, totalElements: 1, totalPages: 1 },
     });
     await vi.waitFor(() => expect(service.displayedPage()?.content).toHaveLength(1));
 

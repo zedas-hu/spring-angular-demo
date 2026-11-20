@@ -84,13 +84,13 @@
 
     <footer class="pager">
     @if (tracksService.displayedPage(); as page) {
-        <button class="mover" (click)="firstPage()" [disabled]="page.first">❮❮</button>
-        <button class="mover" (click)="previousPage()" [disabled]="page.first">❮</button>
-        @if (page.totalPages > 0) {
-            <span>{{ t('PAGE_OF', page.number + 1, page.totalPages) }}</span>
+        <button class="mover" (click)="firstPage()" [disabled]="isFirstPage(page)">❮❮</button>
+        <button class="mover" (click)="previousPage()" [disabled]="isFirstPage(page)">❮</button>
+        @if (page.page.totalPages > 0) {
+            <span>{{ t('PAGE_OF', page.page.number + 1, page.page.totalPages) }}</span>
         }
-        <button class="mover" (click)="nextPage()" [disabled]="page.last">❯</button>
-        <button class="mover" (click)="lastPage()" [disabled]="page.last">❯❯</button>
+        <button class="mover" (click)="nextPage()" [disabled]="isLastPage(page)">❯</button>
+        <button class="mover" (click)="lastPage()" [disabled]="isLastPage(page)">❯❯</button>
     }
     </footer>
 </main>

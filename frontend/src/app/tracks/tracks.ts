@@ -5,7 +5,7 @@ import { NewAlbumComponent } from '../new-album/new-album';
 import { TranslationService, Translator } from '../i18n/translation.service';
 import { MessagesService } from '../messages';
 import { LoginService } from '../login/login.service';
-import { TracksService, SortType, SortDirection } from './tracks.service';
+import { TracksService, SortType, SortDirection, isFirstPage, isLastPage } from './tracks.service';
 import { Popup } from '../popup/popup';
 
 @Component({
@@ -27,6 +27,8 @@ export class Tracks {
   readonly hasSession = this.loginService.hasSession;
   readonly convertToMinutes = formatDuration;
   readonly t: Translator = this.translations.translate.bind(this.translations);
+  readonly isFirstPage = isFirstPage;
+  readonly isLastPage = isLastPage;
 
   constructor() {
     effect(() => {
@@ -59,7 +61,7 @@ export class Tracks {
   }
 
   lastPage(): void {
-    this.tracksService.setCurrentPage((this.tracksService.displayedPage()?.totalPages ?? 1) - 1);
+    this.tracksService.setCurrentPage((this.tracksService.displayedPage()?.page.totalPages ?? 1) - 1);
   }
 
   setOrder(order: SortType, direction?: SortDirection): void {
