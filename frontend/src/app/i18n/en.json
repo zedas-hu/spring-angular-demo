@@ -20,7 +20,7 @@
   "MEDIA_TYPE_REQUIRED": "Select a media type.",
   "DURATION_REQUIRED": "Enter the track duration.",
   "DURATION_FORMAT": "Enter the duration as minutes:seconds (for example, 3:45).",
-  "DURATION_RANGE": "The duration must be greater than zero and within the supported range.",
+  "DURATION_RANGE": "The duration must be at least one second and within the supported range.",
   "COMPOSER_TOO_LONG": "The composer can be at most 220 characters.",
   "UNIT_PRICE_INVALID": "Enter a non-negative price with at most 8 whole digits and 2 decimal places.",
   "SELECT_GENRE": "Select a genre",

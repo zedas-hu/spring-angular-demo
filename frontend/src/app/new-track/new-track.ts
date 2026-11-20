@@ -104,7 +104,7 @@ export class NewTrack {
         }
 
         const milliseconds = (Number(match[1]) * 60 + Number(match[2])) * 1000;
-        return Number.isSafeInteger(milliseconds) && milliseconds > 0 && milliseconds <= 2147483647
+        return Number.isSafeInteger(milliseconds) && milliseconds >= 1000 && milliseconds <= 2147483647
           ? undefined
           : { kind: 'range', message: 'DURATION_RANGE' };
       });

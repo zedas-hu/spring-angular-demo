@@ -10,6 +10,7 @@ import hu.zedas.backend.albums.AlbumRepository;
 import hu.zedas.backend.albums.LogicValidationException;
 import hu.zedas.backend.genres.GenreRepository;
 import hu.zedas.backend.media_types.MediaTypeRepository;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +33,9 @@ class TrackCreationTest {
 
     @Autowired
     private TrackRepository tracksRepository;
+
+    @Autowired
+    private Validator validator;
 
     @Test
     @Transactional
@@ -164,5 +168,18 @@ class TrackCreationTest {
         assertFalse(tracksRepository.existsById(trackId));
         assertEquals(0, tracksRepository.countPlaylistReferences(trackId));
         assertEquals(HttpStatus.NOT_FOUND, trackController.deleteTrack(trackId).getStatusCode());
+    }
+
+    @Test
+    void requiresDurationOfAtLeastOneSecond() {
+        TrackPostRequest request = new TrackPostRequest();
+
+        request.setMilliseconds(999);
+        var violations = validator.validateProperty(request, "milliseconds");
+        assertEquals(1, violations.size());
+        assertEquals("DURATION_RANGE", violations.iterator().next().getMessage());
+
+        request.setMilliseconds(1000);
+        assertTrue(validator.validateProperty(request, "milliseconds").isEmpty());
     }
 }

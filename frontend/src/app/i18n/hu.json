@@ -20,7 +20,7 @@
   "MEDIA_TYPE_REQUIRED": "Válassz médiatípust.",
   "DURATION_REQUIRED": "Add meg a zeneszám hosszát.",
   "DURATION_FORMAT": "A hosszt perc:másodperc formátumban add meg (például 3:45).",
-  "DURATION_RANGE": "A hossz legyen nullánál nagyobb és a támogatott tartományon belüli.",
+  "DURATION_RANGE": "A hossz legalább 1 másodperc legyen, és a támogatott tartományon belüli.",
   "COMPOSER_TOO_LONG": "A zeneszerző neve legfeljebb 220 karakter lehet.",
   "UNIT_PRICE_INVALID": "Adj meg nem negatív árat, legfeljebb 8 egész és 2 tizedesjegyet tartalmazó számot.",
   "SELECT_GENRE": "Válassz műfajt",
