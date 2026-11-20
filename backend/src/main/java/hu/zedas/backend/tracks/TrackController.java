@@ -150,6 +150,7 @@ public class TrackController {
 
     @GetMapping("/{id}")
     public TrackResponse getTrackById(@PathVariable Integer id) {
-        return trackMapper.toResponse(tracksRepository.findById(id).orElseThrow());
+        return trackMapper.toResponse(tracksRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "TRACK_NOT_FOUND")));
     }
 }

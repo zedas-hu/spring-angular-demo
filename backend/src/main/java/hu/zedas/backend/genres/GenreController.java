@@ -2,6 +2,8 @@ package hu.zedas.backend.genres;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class GenreController {
 
     @GetMapping("/{id}")
     public GenreResponse getGenreById(@PathVariable Integer id) {
-        return genreMapper.toResponse(genreRepository.findById(id).orElseThrow());
+        return genreMapper.toResponse(genreRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "GENRE_NOT_FOUND")));
     }
 }

@@ -1,5 +1,7 @@
 package hu.zedas.backend.tracks;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -7,11 +9,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.mockito.Mockito;
 import hu.zedas.backend.albums.AlbumRepository;
 import hu.zedas.backend.genres.GenreRepository;
@@ -64,5 +70,15 @@ class TrackControllerTest {
         verify(tracksRepository, never())
                 .findByNameContainingIgnoreCaseOrAlbum_TitleContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(
                         anyString(), anyString(), anyString(), eq(pageable));
+    }
+
+    @Test
+    void returnsNotFoundForUnknownTrackId() {
+        when(tracksRepository.findById(404)).thenReturn(Optional.empty());
+
+        ResponseStatusException error = assertThrows(
+                ResponseStatusException.class, () -> trackController.getTrackById(404));
+        assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
+        assertEquals("TRACK_NOT_FOUND", error.getReason());
     }
 }
