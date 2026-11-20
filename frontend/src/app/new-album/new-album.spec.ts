@@ -151,4 +151,47 @@ describe('NewAlbumComponent', () => {
     expect(fixture.nativeElement.querySelector('.field-error').textContent).toContain('Enter an artist name.');
     expect(artistInput.getAttribute('aria-invalid')).toBe('true');
   });
+
+  it('does not create an artist when the artist list cannot be loaded', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url === '/api/artists/keys') {
+        return jsonResponse(500, {});
+      }
+      return jsonResponse(201, { albumId: 9, title: 'New', artistId: null, artistName: 'A new artist', tracks: [] });
+    });
+    fixture = TestBed.createComponent(NewAlbumComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    typeInto('album-title', 'New');
+    typeInto('album-artist', 'A new artist');
+    await submit();
+
+    expect(fetchMock).not.toHaveBeenCalledWith('/api/albums', expect.anything());
+    expect(fixture.componentInstance.formError()).toBe('ARTIST_LOOKUP_FAILED');
+  });
+
+  it('uses the matching artist ID when the name was entered before the artist list loaded', async () => {
+    let resolveArtists!: (response: unknown) => void;
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url === '/api/artists/keys') {
+        return new Promise(resolve => { resolveArtists = resolve; });
+      }
+      return jsonResponse(201, { albumId: 9, title: 'New', artistId: 3, artistName: 'Artist', tracks: [] });
+    });
+    fixture = TestBed.createComponent(NewAlbumComponent);
+    fixture.detectChanges();
+
+    typeInto('album-title', 'New');
+    typeInto('album-artist', 'Artist');
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement).click();
+    resolveArtists(jsonResponse(200, [{ key: 3, value: 'Artist' }]));
+    await new Promise(resolve => setTimeout(resolve));
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/albums', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ title: 'New', artistName: 'Artist', artistId: 3 }),
+    }));
+  });
 });

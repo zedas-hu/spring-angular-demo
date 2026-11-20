@@ -10,6 +10,7 @@
   "INVALID_ALBUM_DATA": "Az album adatai érvénytelenek.",
   "ALBUM_CREATE_FAILED": "Az album létrehozása nem sikerült. Próbáld újra.",
   "ALBUM_LOOKUP_FAILED": "A meglévő album keresése nem sikerült. Próbáld újra.",
+  "ARTIST_LOOKUP_FAILED": "Az előadólista betöltése nem sikerült, ezért az album nem lett mentve. Próbáld újra.",
   "NEW_TRACK": "Új zeneszám",
   "NEW_ALBUM": "Új album",
   "TRACK_NAME_REQUIRED": "Adj meg egy zeneszámnevet.",

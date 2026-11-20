@@ -10,6 +10,7 @@
   "INVALID_ALBUM_DATA": "The album data is invalid.",
   "ALBUM_CREATE_FAILED": "Could not create the album. Please try again.",
   "ALBUM_LOOKUP_FAILED": "Could not find the existing album. Please try again.",
+  "ARTIST_LOOKUP_FAILED": "Could not load the artist list, so the album was not saved. Please try again.",
   "NEW_TRACK": "New track",
   "NEW_ALBUM": "New album",
   "TRACK_NAME_REQUIRED": "Enter a track name.",

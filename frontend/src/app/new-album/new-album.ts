@@ -68,9 +68,24 @@ export class NewAlbumComponent {
   }
 
   private async createAlbum(): Promise<TreeValidationResult> {
-    const { title, artistName, artistId } = this.albumForm().value();
+    const { title, artistName, artistId: selectedArtistId } = this.albumForm().value();
     this.formError.set(null);
     this.duplicateAlbumId.set(null);
+
+    // The selector may not have loaded the artist list yet, so resolve the name here before the backend creates an artist.
+    let artistId = selectedArtistId;
+    if (artistId === null) {
+      try {
+        const artists = await this.artistKeyProvider.getKeyList();
+        artistId = artists.find((artist) => artist.value === artistName.trim())?.key ?? null;
+      } catch (lookupError) {
+        if (!(lookupError instanceof Error)) {
+          throw lookupError;
+        }
+        this.formError.set('ARTIST_LOOKUP_FAILED');
+        return undefined;
+      }
+    }
 
     try {
       const album = await this.albumService.createAlbum({
