@@ -41,7 +41,7 @@ main {
                     display: contents;
                     th {
                         text-align: left;
-                        border-bottom: 1px solid var(--line-color);
+                        border-bottom: 1.5px solid var(--line-color);
                         padding-bottom: 1rem;
                         margin-bottom: 1rem;
                         font-size: 85%;
@@ -82,7 +82,7 @@ main {
             }
 
             tfoot tr td {
-                border-top: 1px solid var(--line-color2);
+                border-top: 1.5px solid var(--line-color2);
             }
         }
     }

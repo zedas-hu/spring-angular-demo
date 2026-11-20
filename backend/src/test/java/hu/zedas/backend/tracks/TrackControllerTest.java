@@ -22,6 +22,7 @@ class TrackControllerTest {
     private AlbumRepository albumRepository;
     private GenreRepository genreRepository;
     private MediaTypeRepository mediaTypeRepository;
+    private TrackMapper trackMapper;
     private TrackController trackController;
 
     @BeforeEach
@@ -30,7 +31,9 @@ class TrackControllerTest {
         albumRepository = Mockito.mock(AlbumRepository.class);
         genreRepository = Mockito.mock(GenreRepository.class);
         mediaTypeRepository = Mockito.mock(MediaTypeRepository.class);
-        trackController = new TrackController(tracksRepository, albumRepository, genreRepository, mediaTypeRepository);
+        trackMapper = Mockito.mock(TrackMapper.class);
+        trackController = new TrackController(
+                tracksRepository, albumRepository, genreRepository, mediaTypeRepository, trackMapper);
     }
 
     @Test

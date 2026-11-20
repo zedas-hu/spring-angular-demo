@@ -7,6 +7,7 @@ import { MessagesService } from '../messages';
 import { AlbumService } from './album.service';
 import { NewTrack } from '../new-track/new-track';
 import { TrackRecord, TracksService } from '../tracks/tracks.service';
+import { LoginService } from '../login/login.service';
 
 @Component({
   selector: 'app-album',
@@ -22,7 +23,8 @@ export class Album {
   private readonly tracksService = inject(TracksService);
   private readonly translations = inject(TranslationService);
   private readonly messages = inject(MessagesService);
-  private trackDialog?: ComponentRef<NewTrack>;
+  private readonly loginService = inject(LoginService);
+  private trackDialogRef?: ComponentRef<NewTrack>;
   private readonly routeParams = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
@@ -34,6 +36,7 @@ export class Album {
     return Number.isInteger(albumId) && albumId > 0 ? albumId : null;
   });
   readonly pageResource = this.albumService.pageData;
+  readonly sessionLoaded = this.loginService.hasSession;
   readonly convertToMinutes = formatDuration;
   readonly t: Translator = this.translations.translate.bind(this.translations);
 
@@ -67,7 +70,7 @@ export class Album {
       if (!(error instanceof Error)) {
         throw error;
       }
-      this.messages.error(this.t('ALBUM_DELETE_FAILED'));
+      this.messages.error(this.translations.translateError(error.message, 'ALBUM_DELETE_FAILED'));
     }
   }
 
@@ -111,7 +114,7 @@ export class Album {
   }
 
   private openTrackDialog(albumId: number, track: TrackRecord | null = null): void {
-    if (!this.trackDialog) {
+    if (!this.trackDialogRef) {
       const dialog = this.viewContainer.createComponent(NewTrack);
       dialog.setInput('albumId', albumId);
       dialog.setInput('track', track);
@@ -123,10 +126,10 @@ export class Album {
       };
       dialog.instance.created.subscribe(reloadAlbum);
       dialog.instance.updated.subscribe(reloadAlbum);
-      this.trackDialog = dialog;
+      this.trackDialogRef = dialog;
     }
 
-    this.trackDialog.instance.open();
+    this.trackDialogRef.instance.open();
   }
 
   private syncAlbum(): void {
@@ -134,8 +137,8 @@ export class Album {
   }
 
   private destroyNewTrackDialog(): void {
-    this.trackDialog?.destroy();
-    this.trackDialog = undefined;
+    this.trackDialogRef?.destroy();
+    this.trackDialogRef = undefined;
   }
 
 }

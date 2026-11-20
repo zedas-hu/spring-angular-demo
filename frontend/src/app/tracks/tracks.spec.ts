@@ -1,15 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal, type WritableSignal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { provideRouter, Router } from '@angular/router';
 import { Tracks } from './tracks';
 import { PageResponse, TrackRecord, TracksService } from './tracks.service';
 import { NewAlbumComponent } from '../new-album/new-album';
+import { LoginService } from '../login/login.service';
 
 describe('Tracks', () => {
   let component: Tracks;
   let fixture: ComponentFixture<Tracks>;
   let fetchMock: ReturnType<typeof vi.fn>;
+  let hasSession: WritableSignal<boolean>;
   const pageResponse = (number: number, last: boolean): PageResponse<TrackRecord> => ({
     content: [],
     empty: true,
@@ -26,6 +29,7 @@ describe('Tracks', () => {
   };
 
   beforeEach(async () => {
+    hasSession = signal(false);
     fetchMock = vi.fn(async (url: string) => ({
       ok: true,
       json: async () => pageResponse(Number(new URL(url, 'http://localhost').searchParams.get('page')), false),
@@ -34,7 +38,10 @@ describe('Tracks', () => {
 
     await TestBed.configureTestingModule({
       imports: [Tracks],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        { provide: LoginService, useValue: { hasSession } },
+      ],
     }).compileComponents();
 
     TestBed.inject(TracksService).setSort('name', 'desc');
@@ -68,6 +75,17 @@ describe('Tracks', () => {
     expect(fixture.nativeElement.querySelector('tbody td.empty').textContent).toContain('No records.');
   });
 
+  it('shows the new album action only when a session exists', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('header .new')).toBeNull();
+
+    hasSession.set(true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('header .new')).not.toBeNull();
+  });
+
   it('hides the page number when the page count is zero', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
@@ -90,6 +108,32 @@ describe('Tracks', () => {
     expect(lastRequestParams().get('page')).toBe('1');
     expect(lastRequestParams().get('sort')).toBe('name,desc');
     expect(component.pageResource.value()?.number).toBe(1);
+  });
+
+  it('aborts the previous search request when the filter changes while loading', async () => {
+    await fixture.whenStable();
+    const tracksService = TestBed.inject(TracksService);
+    let firstRequestSignal: AbortSignal | undefined;
+    fetchMock
+      .mockImplementationOnce((_url: string, options: RequestInit) => new Promise((_resolve, reject) => {
+        firstRequestSignal = options.signal as AbortSignal;
+        firstRequestSignal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+      }))
+      .mockImplementationOnce(async (url: string) => ({
+        ok: true,
+        json: async () => pageResponse(Number(new URL(url, 'http://localhost').searchParams.get('page')), true),
+      }));
+
+    tracksService.setFilter('r');
+    fixture.detectChanges();
+    expect(firstRequestSignal?.aborted).toBe(false);
+
+    tracksService.setFilter('ro');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(firstRequestSignal?.aborted).toBe(true);
+    expect(lastRequestParams().get('filter')).toBe('ro');
   });
 
   it('keeps sort, filter, and page when the component is recreated', async () => {
@@ -152,11 +196,19 @@ describe('Tracks', () => {
   });
 
   it('creates the new album dialog on demand and opens it', () => {
-    expect(fixture.nativeElement.querySelector('app-new-album')).toBeNull();
+    const showModal = HTMLDialogElement.prototype.showModal;
+    HTMLDialogElement.prototype.showModal = function () { this.open = true; };
 
-    component.showNewAlbumDialog();
+    try {
+      expect(fixture.nativeElement.querySelector('app-new-album')).toBeNull();
 
-    const dialog = fixture.nativeElement.querySelector('app-new-album dialog') as HTMLDialogElement;
-    expect(dialog.open).toBe(true);
+      component.showNewAlbumDialog();
+
+      const newAlbum = fixture.debugElement.query(By.directive(NewAlbumComponent));
+      const dialog = newAlbum.nativeElement.querySelector('dialog') as HTMLDialogElement;
+      expect(dialog.open).toBe(true);
+    } finally {
+      HTMLDialogElement.prototype.showModal = showModal;
+    }
   });
 });

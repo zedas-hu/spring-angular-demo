@@ -2,7 +2,6 @@ package hu.zedas.backend.media_types;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(
     componentModel = "spring", 
@@ -10,8 +9,5 @@ import org.mapstruct.factory.Mappers;
     unmappedSourcePolicy = ReportingPolicy.ERROR
 )
 public interface MediaTypeMapper {
-    MediaTypeMapper INSTANCE = Mappers.getMapper(MediaTypeMapper.class);
-
-    
     MediaTypeResponse toResponse(MediaTypeEntity entity);
 }

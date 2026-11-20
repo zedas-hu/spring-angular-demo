@@ -56,6 +56,7 @@
   "DELETE": "Törlés",
   "DELETE_ALBUM_CONFIRM": "Biztosan törlöd ezt az albumot és a hozzá tartozó összes zeneszámot?",
   "ALBUM_DELETE_FAILED": "Az album törlése nem sikerült. Próbáld újra.",
+  "ALBUM_DELETE_REFERENCED": "Az album egy zeneszáma számlán szerepel, ezért az album nem törölhető.",
   "NAME": "Név",
   "ARTIST": "Előadó",
   "GENRE": "Műfaj",
@@ -73,5 +74,15 @@
   "LANGUAGE": "Nyelv",
   "THEME": "Téma",
   "THEME_LIGHT": "Világos",
-  "THEME_DARK": "Sötét"
+  "THEME_DARK": "Sötét",
+  "LOGIN": "Bejelentkezés",
+  "LOGIN_DEMO_WARNING": "Ez csak demó célú, szimulált bejelentkezés; valódi hitelesítés nem történik.",
+  "EMPLOYEE": "Alkalmazott",
+  "SELECT_EMPLOYEE": "Válassz alkalmazottat",
+  "LOADING_EMPLOYEES": "Alkalmazottak betöltése...",
+  "LOGIN_EMPLOYEES_FETCH_FAILED": "Az alkalmazottak betöltése nem sikerült. Próbáld újra.",
+  "LOGIN_SESSION_FETCH_FAILED": "A bejelentkezési munkamenet ellenőrzése nem sikerült.",
+  "LOGIN_FAILED": "A bejelentkezési munkamenet létrehozása nem sikerült. Próbáld újra.",
+  "LOGOUT": "Kijelentkezés",
+  "LOGOUT_FAILED": "A kijelentkezés nem sikerült. Próbáld újra."
 }

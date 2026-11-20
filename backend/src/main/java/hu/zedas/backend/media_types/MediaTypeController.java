@@ -11,18 +11,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/api/media-types")
 public class MediaTypeController {
     private final MediaTypeRepository mediaTypeRepository;
+    private final MediaTypeMapper mediaTypeMapper;
 
-    public MediaTypeController(MediaTypeRepository mediaTypeRepository) {
+    public MediaTypeController(MediaTypeRepository mediaTypeRepository, MediaTypeMapper mediaTypeMapper) {
         this.mediaTypeRepository = mediaTypeRepository;
+        this.mediaTypeMapper = mediaTypeMapper;
     }
 
     @GetMapping
     public List<MediaTypeResponse> getAllMediaTypes() {
-        return mediaTypeRepository.findAll().stream().map(MediaTypeMapper.INSTANCE::toResponse).toList();
+        return mediaTypeRepository.findAll().stream().map(mediaTypeMapper::toResponse).toList();
     }
 
     @GetMapping("/{id}")
     public MediaTypeResponse getMediaTypeById(@PathVariable Integer id) {
-        return MediaTypeMapper.INSTANCE.toResponse(mediaTypeRepository.findById(id).orElseThrow());
+        return mediaTypeMapper.toResponse(mediaTypeRepository.findById(id).orElseThrow());
     }
 }

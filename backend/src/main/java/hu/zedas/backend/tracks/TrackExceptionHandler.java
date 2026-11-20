@@ -3,7 +3,7 @@ package hu.zedas.backend.tracks;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import hu.zedas.backend.albums.BusinessValidationException;
+import hu.zedas.backend.albums.LogicValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -22,8 +22,8 @@ public class TrackExceptionHandler {
         return problem;
     }
 
-    @ExceptionHandler(BusinessValidationException.class)
-    public ProblemDetail handleBusinessValidation(BusinessValidationException ex) {
+    @ExceptionHandler(LogicValidationException.class)
+    public ProblemDetail handleBusinessValidation(LogicValidationException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
         problem.setProperty("fieldErrors", Map.of(ex.getField(), ex.getMessage()));
         return problem;

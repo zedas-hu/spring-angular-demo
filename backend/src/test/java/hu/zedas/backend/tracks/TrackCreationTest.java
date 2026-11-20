@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hu.zedas.backend.albums.AlbumEntity;
 import hu.zedas.backend.albums.AlbumRepository;
-import hu.zedas.backend.albums.BusinessValidationException;
+import hu.zedas.backend.albums.LogicValidationException;
 import hu.zedas.backend.genres.GenreRepository;
 import hu.zedas.backend.media_types.MediaTypeRepository;
 import org.junit.jupiter.api.Test;
@@ -79,7 +79,7 @@ class TrackCreationTest {
 
         trackController.createTrack(request);
         assertEquals("TRACK_NAME_DUPLICATION", assertThrows(
-                BusinessValidationException.class,
+                LogicValidationException.class,
                 () -> trackController.createTrack(request)).getMessage());
 
         request.setAlbumId(otherAlbum.getAlbumId());
@@ -121,8 +121,8 @@ class TrackCreationTest {
                 .filter(track -> tracksRepository.countInvoiceItems(track.getTrackId()) > 0)
                 .findFirst()
                 .orElseThrow();
-        BusinessValidationException referencedError = assertThrows(
-                BusinessValidationException.class,
+        LogicValidationException referencedError = assertThrows(
+                LogicValidationException.class,
                 () -> trackController.deleteTrack(referenced.getTrackId()));
         assertEquals("TRACK_DELETE_REFERENCED", referencedError.getMessage());
 

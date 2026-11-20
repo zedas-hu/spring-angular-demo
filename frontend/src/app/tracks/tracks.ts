@@ -4,6 +4,7 @@ import { formatDuration } from '../tools';
 import { NewAlbumComponent } from '../new-album/new-album';
 import { TranslationService, Translator } from '../i18n/translation.service';
 import { MessagesService } from '../messages';
+import { LoginService } from '../login/login.service';
 import { TracksService, SortType, SortDirection } from './tracks.service';
 import { Popup } from '../popup/popup';
 
@@ -19,9 +20,11 @@ export class Tracks {
   private readonly viewContainer = inject(ViewContainerRef);
   private readonly translations = inject(TranslationService);
   private readonly messages = inject(MessagesService);
-  private newAlbumDialog?: ComponentRef<NewAlbumComponent>;
+  private readonly loginService = inject(LoginService);
+  private newAlbumDialogRef?: ComponentRef<NewAlbumComponent>;
 
   readonly pageResource = this.tracksService.pageData;
+  readonly hasSession = this.loginService.hasSession;
   readonly convertToMinutes = formatDuration;
   readonly t: Translator = this.translations.translate.bind(this.translations);
 
@@ -68,7 +71,7 @@ export class Tracks {
   }
 
   showNewAlbumDialog(): void {
-    if (!this.newAlbumDialog) {
+    if (!this.newAlbumDialogRef) {
       const dialog = this.viewContainer.createComponent(NewAlbumComponent);
       // The dialog element must exist before open() reads the view query.
       dialog.changeDetectorRef.detectChanges();
@@ -81,13 +84,13 @@ export class Tracks {
         this.destroyNewAlbumDialog();
         this.navigateToAlbum(albumId);
       });
-      this.newAlbumDialog = dialog;
+      this.newAlbumDialogRef = dialog;
     }
-    this.newAlbumDialog.instance.open();
+    this.newAlbumDialogRef.instance.open();
   }
 
   private destroyNewAlbumDialog(): void {
-    this.newAlbumDialog?.destroy();
-    this.newAlbumDialog = undefined;
+    this.newAlbumDialogRef?.destroy();
+    this.newAlbumDialogRef = undefined;
   }
 }

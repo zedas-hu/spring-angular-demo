@@ -25,16 +25,22 @@ public class AlbumController {
     private final AlbumRepository albumRepository;
     private final ArtistRepository artistRepository;
     private final TrackRepository trackRepository;
+    private final AlbumMapper albumMapper;
 
-    public AlbumController(AlbumRepository albumRepository, ArtistRepository artistRepository, TrackRepository trackRepository) {
+    public AlbumController(
+            AlbumRepository albumRepository,
+            ArtistRepository artistRepository,
+            TrackRepository trackRepository,
+            AlbumMapper albumMapper) {
         this.albumRepository = albumRepository;
         this.artistRepository = artistRepository;
         this.trackRepository = trackRepository;
+        this.albumMapper = albumMapper;
     }
 
     @GetMapping
     public List<AlbumResponse> getAllAlbums() {
-        return albumRepository.findAll().stream().map(AlbumMapper.INSTANCE::toResponse).toList();
+        return albumRepository.findAll().stream().map(albumMapper::toResponse).toList();
     }
 
     @GetMapping("/keys")
@@ -45,9 +51,9 @@ public class AlbumController {
     }
 
     @GetMapping("/{id}")
-    public AlbumResponse getAlbumById(@PathVariable Integer id) {
-        return AlbumMapper.INSTANCE.toResponse(albumRepository.findById(id).orElseThrow(
-            () -> new IllegalArgumentException("Album not found")));
+    public ResponseEntity<AlbumResponse> getAlbumById(@PathVariable Integer id) {
+        return ResponseEntity.of(
+                albumRepository.findById(id).map(albumMapper::toResponse));
     }
 
     @DeleteMapping("/{id}")
@@ -56,7 +62,11 @@ public class AlbumController {
         if (!albumRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
+        if (trackRepository.countInvoiceItemsByAlbumId(id) > 0) {
+            throw new LogicValidationException("albumId", "ALBUM_DELETE_REFERENCED");
+        }
 
+        trackRepository.deletePlaylistReferencesByAlbumId(id);
         trackRepository.deleteByAlbum_AlbumId(id);
         albumRepository.deleteById(id);
         return ResponseEntity.noContent().build();
@@ -66,19 +76,17 @@ public class AlbumController {
     @Transactional
     public ResponseEntity<AlbumResponse> createAlbum(@Valid @RequestBody AlbumPostRequest request) {
         if (albumRepository.findByTitle(request.getTitle()).isPresent())
-            throw new BusinessValidationException("title", "TITLE_DUPLICATION");
+            throw new LogicValidationException("title", "TITLE_DUPLICATION");
         ArtistEntity artist = request.getArtistId() == null
                 ? artistRepository.save(new ArtistEntity(request.getArtistName()))
                 : artistRepository.findById(request.getArtistId()).orElseThrow(
-                        () -> new BusinessValidationException("artistId", "ARTIST_NOT_FOUND", HttpStatus.BAD_REQUEST));
+                        () -> new LogicValidationException("artistId", "ARTIST_NOT_FOUND", HttpStatus.BAD_REQUEST));
         AlbumEntity album = new AlbumEntity(request.getTitle(), artist);
-        // AlbumEntity entity = AlbumMapper.INSTANCE.toEntity(request);
-        // entity.setArtist(artist);
         album = albumRepository.save(album);
         URI location = URI.create("/api/albums/" + album.getAlbumId());
 
         return ResponseEntity.created(location)
-                .body(AlbumMapper.INSTANCE.toResponse(album));
+                .body(albumMapper.toResponse(album));
     }
     
 }

@@ -3,7 +3,6 @@ package hu.zedas.backend.tracks;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(
     componentModel = "spring", 
@@ -11,8 +10,6 @@ import org.mapstruct.factory.Mappers;
     unmappedSourcePolicy = ReportingPolicy.ERROR
 )
 public interface TrackMapper {
-    TrackMapper INSTANCE = Mappers.getMapper(TrackMapper.class);
-
     @Mapping(target = "albumId", source = "album.albumId")
     @Mapping(target = "albumTitle", source = "album.title")
     @Mapping(target = "artistName", source = "album.artist.name")

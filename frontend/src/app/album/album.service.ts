@@ -30,7 +30,6 @@ export class AlbumCreateError extends Error {
 
 @Injectable({ providedIn: 'root' })
 export class AlbumService {
-  // private readonly http = inject(HttpClient);
   private readonly currentAlbum = signal<number | null>(null);
 
   async createAlbum(request: AlbumCreateRequest): Promise<AlbumRecord> {
@@ -86,7 +85,8 @@ export class AlbumService {
     const response = await fetch(`/api/albums/${albumId}`, { method: 'DELETE' });
 
     if (!response.ok) {
-      throw new Error('ALBUM_DELETE_FAILED');
+      const problem = await response.json().catch(() => ({})) as { detail?: string };
+      throw new Error(problem.detail ?? 'ALBUM_DELETE_FAILED');
     }
   }
 }

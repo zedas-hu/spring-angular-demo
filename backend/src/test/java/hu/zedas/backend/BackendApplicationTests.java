@@ -2,6 +2,10 @@ package hu.zedas.backend;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Locale;
 
@@ -11,7 +15,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
+import hu.zedas.backend.login.CurrentUser;
 import hu.zedas.backend.tracks.TrackEntity;
 import hu.zedas.backend.tracks.TrackRepository;
 
@@ -20,8 +29,35 @@ class BackendApplicationTests {
 	@Autowired
 	private TrackRepository tracksRepository;
 
+	@Autowired
+	private WebApplicationContext webApplicationContext;
+
 	@Test
 	void contextLoads() {
+	}
+
+	@Test
+	void rejectsApiMutationsWithoutACurrentUserSession() throws Exception {
+		MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+		mockMvc.perform(post("/api/albums")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("{}"))
+				.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	void returnsAllCurrentUserFieldsFromTheSessionEndpoint() throws Exception {
+		MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+		mockMvc.perform(get("/api/login/session")
+				.sessionAttr(CurrentUser.SESSION_ATTRIBUTE,
+						new CurrentUser(7, "Jane", "Doe", "jane@example.com")))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.employeeId").value(7))
+				.andExpect(jsonPath("$.firstName").value("Jane"))
+				.andExpect(jsonPath("$.lastName").value("Doe"))
+				.andExpect(jsonPath("$.email").value("jane@example.com"));
 	}
 
 	@Test

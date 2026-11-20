@@ -1,14 +1,8 @@
 # TODO
 
-- Search mező DOS-védelem
+## Átnézni az utolsó változtatásokat.
 
-## Bejelentkezés
-
-- Fősávba login
-- Login dialógus
-- Ez az employees tábla alapján lehetséges
-- A new, stb. csak belejentkezve legyenek elérhetők
-  - A popunál legyen egy "simulated login" felirat.
+## Átnézetni AI-val, hogy tényleg optimális-e minden.
 
 ## Docker deploy
 
@@ -26,3 +20,19 @@ Angular
   signal, resource, form
 Database
   SqLite
+
+## Tanulás
+
+public record CurrentUser(…) implements Serializable
+
+@Configuration
+public class SessionSecurityConfiguration implements WebMvcConfigurer {
+
+AlbumMapper.INSTANCE.toResponse
+
+x ResponseEntity.notFound().build()
+
+x public interface CurrentUserMapper {
+    CurrentUserMapper INSTANCE = Mappers.getMapper(CurrentUserMapper.class);
+
+public class SessionAuthenticationInterceptor implements HandlerInterceptor {

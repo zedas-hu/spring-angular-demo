@@ -23,8 +23,8 @@ public class AlbumExceptionHandler {
         return problem;
     }
 
-    @ExceptionHandler(BusinessValidationException.class)
-    public ProblemDetail handleBusinessValidation(BusinessValidationException ex) {
+    @ExceptionHandler(LogicValidationException.class)
+    public ProblemDetail handleBusinessValidation(LogicValidationException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
         problem.setProperty("fieldErrors", Map.of(ex.getField(), ex.getMessage()));
         return problem;

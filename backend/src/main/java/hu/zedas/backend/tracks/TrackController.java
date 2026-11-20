@@ -5,7 +5,7 @@ import java.util.Set;
 
 import hu.zedas.backend.albums.AlbumEntity;
 import hu.zedas.backend.albums.AlbumRepository;
-import hu.zedas.backend.albums.BusinessValidationException;
+import hu.zedas.backend.albums.LogicValidationException;
 import hu.zedas.backend.genres.GenreRepository;
 import hu.zedas.backend.media_types.MediaTypeRepository;
 import org.springframework.data.domain.Page;
@@ -37,30 +37,33 @@ public class TrackController {
     private final AlbumRepository albumRepository;
     private final GenreRepository genreRepository;
     private final MediaTypeRepository mediaTypeRepository;
+    private final TrackMapper trackMapper;
 
     public TrackController(
             TrackRepository tracksRepository,
             AlbumRepository albumRepository,
             GenreRepository genreRepository,
-            MediaTypeRepository mediaTypeRepository) {
+            MediaTypeRepository mediaTypeRepository,
+            TrackMapper trackMapper) {
         this.tracksRepository = tracksRepository;
         this.albumRepository = albumRepository;
         this.genreRepository = genreRepository;
         this.mediaTypeRepository = mediaTypeRepository;
+        this.trackMapper = trackMapper;
     }
 
     @PostMapping
     @Transactional
     public ResponseEntity<TrackResponse> createTrack(@Valid @RequestBody TrackPostRequest request) {
         AlbumEntity album = albumRepository.findById(request.getAlbumId()).orElseThrow(
-                () -> new BusinessValidationException("albumId", "ALBUM_NOT_FOUND", HttpStatus.BAD_REQUEST));
+                () -> new LogicValidationException("albumId", "ALBUM_NOT_FOUND", HttpStatus.BAD_REQUEST));
         if (tracksRepository.existsByAlbum_AlbumIdAndNameIgnoreCase(album.getAlbumId(), request.getName())) {
-            throw new BusinessValidationException("name", "TRACK_NAME_DUPLICATION");
+            throw new LogicValidationException("name", "TRACK_NAME_DUPLICATION");
         }
         var genre = genreRepository.findById(request.getGenreId()).orElseThrow(
-                () -> new BusinessValidationException("genreId", "GENRE_NOT_FOUND", HttpStatus.BAD_REQUEST));
+                () -> new LogicValidationException("genreId", "GENRE_NOT_FOUND", HttpStatus.BAD_REQUEST));
         var mediaType = mediaTypeRepository.findById(request.getMediaTypeId()).orElseThrow(
-                () -> new BusinessValidationException("mediaTypeId", "MEDIA_TYPE_NOT_FOUND", HttpStatus.BAD_REQUEST));
+                () -> new LogicValidationException("mediaTypeId", "MEDIA_TYPE_NOT_FOUND", HttpStatus.BAD_REQUEST));
 
         TrackEntity track = new TrackEntity();
         track.setName(request.getName());
@@ -73,7 +76,7 @@ public class TrackController {
 
         track = tracksRepository.save(track);
         URI location = URI.create("/api/tracks/" + track.getTrackId());
-        return ResponseEntity.created(location).body(TrackMapper.INSTANCE.toResponse(track));
+        return ResponseEntity.created(location).body(trackMapper.toResponse(track));
     }
 
     @PutMapping("/{id}")
@@ -82,15 +85,15 @@ public class TrackController {
         TrackEntity track = tracksRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "TRACK_NOT_FOUND"));
         AlbumEntity album = albumRepository.findById(request.getAlbumId()).orElseThrow(
-                () -> new BusinessValidationException("albumId", "ALBUM_NOT_FOUND", HttpStatus.BAD_REQUEST));
+                () -> new LogicValidationException("albumId", "ALBUM_NOT_FOUND", HttpStatus.BAD_REQUEST));
         if (tracksRepository.existsByAlbum_AlbumIdAndNameIgnoreCaseAndTrackIdNot(
                 album.getAlbumId(), request.getName(), id)) {
-            throw new BusinessValidationException("name", "TRACK_NAME_DUPLICATION");
+            throw new LogicValidationException("name", "TRACK_NAME_DUPLICATION");
         }
         var genre = genreRepository.findById(request.getGenreId()).orElseThrow(
-                () -> new BusinessValidationException("genreId", "GENRE_NOT_FOUND", HttpStatus.BAD_REQUEST));
+                () -> new LogicValidationException("genreId", "GENRE_NOT_FOUND", HttpStatus.BAD_REQUEST));
         var mediaType = mediaTypeRepository.findById(request.getMediaTypeId()).orElseThrow(
-                () -> new BusinessValidationException("mediaTypeId", "MEDIA_TYPE_NOT_FOUND", HttpStatus.BAD_REQUEST));
+                () -> new LogicValidationException("mediaTypeId", "MEDIA_TYPE_NOT_FOUND", HttpStatus.BAD_REQUEST));
 
         track.setName(request.getName());
         track.setAlbum(album);
@@ -100,7 +103,7 @@ public class TrackController {
         track.setMilliseconds(request.getMilliseconds());
         track.setUnitPrice(request.getUnitPrice());
 
-        return TrackMapper.INSTANCE.toResponse(tracksRepository.save(track));
+        return trackMapper.toResponse(tracksRepository.save(track));
     }
 
     @DeleteMapping("/{id}")
@@ -110,7 +113,7 @@ public class TrackController {
             return ResponseEntity.notFound().build();
         }
         if (tracksRepository.countInvoiceItems(id) > 0) {
-            throw new BusinessValidationException("trackId", "TRACK_DELETE_REFERENCED");
+            throw new LogicValidationException("trackId", "TRACK_DELETE_REFERENCED");
         }
 
         tracksRepository.deletePlaylistReferences(id);
@@ -135,13 +138,13 @@ public class TrackController {
             return tracksRepository
                     .findByNameContainingIgnoreCaseOrAlbum_TitleContainingIgnoreCaseOrAlbum_Artist_NameContainingIgnoreCase(
                             normalizedFilter, normalizedFilter, normalizedFilter, pageable)
-                    .map(TrackMapper.INSTANCE::toResponse);
+                    .map(trackMapper::toResponse);
 
-        return tracksRepository.findAll(pageable).map(TrackMapper.INSTANCE::toResponse);
+        return tracksRepository.findAll(pageable).map(trackMapper::toResponse);
     }
 
     @GetMapping("/{id}")
     public TrackResponse getTrackById(@PathVariable Integer id) {
-        return TrackMapper.INSTANCE.toResponse(tracksRepository.findById(id).orElseThrow());
+        return trackMapper.toResponse(tracksRepository.findById(id).orElseThrow());
     }
 }

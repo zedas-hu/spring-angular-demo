@@ -1,12 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ComponentRef, inject, signal, ViewContainerRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Language, TranslationService, Translator } from './i18n/translation.service';
 import { Popup } from './popup/popup';
-
-type Theme = 'light' | 'dark';
-
-const LANGUAGE_STORAGE_KEY = 'language';
-const THEME_STORAGE_KEY = 'theme';
+import { LoginComponent } from './login/login';
+import { LoginService } from './login/login.service';
+import { MessagesService } from './messages';
+import { AppPreferencesService, Theme } from './app-preferences.service';
 
 @Component({
   imports: [RouterOutlet, Popup],
@@ -16,29 +15,68 @@ const THEME_STORAGE_KEY = 'theme';
 })
 export class App {
   private readonly translations = inject(TranslationService);
+  private readonly preferences = inject(AppPreferencesService);
+  private readonly loginService = inject(LoginService);
+  private readonly messages = inject(MessagesService);
+  private readonly viewContainer = inject(ViewContainerRef);
+  private loginDialogRef?: ComponentRef<LoginComponent>;
   protected readonly title = signal('frontend');
   readonly t: Translator = this.translations.translate.bind(this.translations);
+  readonly sessionInitialized = this.loginService.isSessionChecked; // Prevent flash
+  readonly hasSession = this.loginService.hasSession;
 
   constructor() {
-    let lang = localStorage.getItem(LANGUAGE_STORAGE_KEY) as Language;
-    if (lang !== 'en' && lang !== 'hu')
-      lang = 'en';
+    this.translations.setLanguage(this.preferences.getLanguage());
+    document.documentElement.style.colorScheme = this.preferences.getTheme();
 
-    this.translations.setLanguage(lang);
-
-    let theme = localStorage.getItem(THEME_STORAGE_KEY) as Theme;
-    if (theme !== 'light' && theme !== 'dark')
-      theme = 'dark';
-    document.documentElement.style.colorScheme = theme;
+    this.loadSession();
   }
 
   setLanguage(lang: Language) {
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    this.preferences.setLanguage(lang);
     this.translations.setLanguage(lang);
   }
 
   setTheme(theme: Theme): void {
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    this.preferences.setTheme(theme);
     document.documentElement.style.colorScheme = theme;
+  }
+
+  loginDialog(): void {
+    if (!this.loginDialogRef) {
+      const dialog = this.viewContainer.createComponent(LoginComponent);
+      dialog.changeDetectorRef.detectChanges();
+      dialog.instance.closed.subscribe(() => this.destroyLoginDialog());
+      this.loginDialogRef = dialog;
+    }
+
+    this.loginDialogRef.instance.open();
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.loginService.logout();
+    } catch (error) {
+      this.messages.error(this.translations.translateError(
+        error instanceof Error ? error.message : 'LOGOUT_FAILED',
+        'LOGOUT_FAILED',
+      ));
+    }
+  }
+
+  private async loadSession(): Promise<void> {
+    try {
+      await this.loginService.loadSession();
+    } catch (error) {
+      this.messages.error(this.translations.translateError(
+        error instanceof Error ? error.message : 'LOGIN_SESSION_FETCH_FAILED',
+        'LOGIN_SESSION_FETCH_FAILED',
+      ));
+    }
+  }
+
+  private destroyLoginDialog(): void {
+    this.loginDialogRef?.destroy();
+    this.loginDialogRef = undefined;
   }
 }

@@ -32,7 +32,6 @@ interface NewTrackModel {
 @Component({
   imports: [FormField, FormRoot],
   selector: 'app-new-track',
-  styleUrl: './new-track.css',
   templateUrl: './new-track.html',
 })
 export class NewTrack {

@@ -1,0 +1,35 @@
+<dialog #dialog class="dialog-box" id="login-dialog">
+  <header><h1>{{ t('LOGIN') }}</h1></header>
+
+  <form (submit)="login($event)">
+    <content>
+      <p class="field-warning">{{ t('LOGIN_DEMO_WARNING') }}</p>
+      <label for="login-employee">{{ t('EMPLOYEE') }}<br />
+        <select
+          id="login-employee"
+          [value]="selectedEmail()"
+          (change)="selectEmployee($event)"
+          [disabled]="!employees.hasValue() || submitting()"
+        >
+          <option value="">{{ t('SELECT_EMPLOYEE') }}</option>
+          @if (employees.hasValue()) {
+            @for (employee of employees.value(); track employee.employeeId) {
+              <option [value]="employee.email">{{ employee.firstName }} {{ employee.lastName }}</option>
+            }
+          }
+        </select>
+      </label>
+
+      @if (employees.isLoading()) {
+        <p>{{ t('LOADING_EMPLOYEES') }}</p>
+      }
+    </content>
+
+    <footer>
+      <button type="submit" class="tool text-button" [disabled]="!selectedEmail() || !employees.hasValue() || submitting()">
+        {{ t('LOGIN') }}
+      </button>
+      <button type="button" class="tool text-button" (click)="close()">{{ t('CANCEL') }}</button>
+    </footer>
+  </form>
+</dialog>

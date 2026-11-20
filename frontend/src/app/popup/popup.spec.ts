@@ -12,6 +12,9 @@ describe('Popup', () => {
 
     fixture = TestBed.createComponent(Popup);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('class', 'order');
+    fixture.componentRef.setInput('text', 'Order');
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 

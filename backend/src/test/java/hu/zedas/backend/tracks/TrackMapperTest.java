@@ -5,12 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.mapstruct.factory.Mappers;
 import org.junit.jupiter.api.Test;
 
 import hu.zedas.backend.albums.AlbumEntity;
 import hu.zedas.backend.artists.ArtistEntity;
 
 class TrackMapperTest {
+    private final TrackMapper trackMapper = Mappers.getMapper(TrackMapper.class);
+
     @Test
     void mapsAlbumArtistAsArtistName() {
         ArtistEntity artist = mock(ArtistEntity.class);
@@ -24,7 +27,7 @@ class TrackMapperTest {
         TrackEntity track = mock(TrackEntity.class);
         when(track.getAlbum()).thenReturn(album);
 
-        TrackResponse response = TrackMapper.INSTANCE.toResponse(track);
+        TrackResponse response = trackMapper.toResponse(track);
 
         assertEquals("Artist", response.artistName());
     }
@@ -33,7 +36,7 @@ class TrackMapperTest {
     void returnsNullArtistNameWhenTrackHasNoAlbum() {
         TrackEntity track = mock(TrackEntity.class);
 
-        TrackResponse response = TrackMapper.INSTANCE.toResponse(track);
+        TrackResponse response = trackMapper.toResponse(track);
 
         assertNull(response.artistName());
     }

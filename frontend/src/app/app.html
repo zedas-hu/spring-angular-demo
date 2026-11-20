@@ -1,6 +1,13 @@
 <main>
     <nav>
         <h1>Chinook DB Demo</h1>
+        <div class="login">
+        @if (sessionInitialized() && !hasSession()) {
+            <a class="text-button" (click)="loginDialog()">{{ t('LOGIN') }} ꗃ</a>
+        } @else if (sessionInitialized() && hasSession()) {
+            <a class="text-button" (click)="logout()">{{ t('LOGOUT') }} 🔒︎</a>
+        }
+        </div>
         <app-popup class="language" [text]="t('LANGUAGE') + ' 🌏︎'">
             <label>
                 <a class="tool" (click)="setLanguage('hu')">{{ t('LANG_HU') }}</a>

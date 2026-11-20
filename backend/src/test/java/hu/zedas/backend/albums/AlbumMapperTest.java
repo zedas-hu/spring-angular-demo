@@ -7,10 +7,17 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import hu.zedas.backend.tracks.TrackMapperImpl;
 import hu.zedas.backend.tracks.TrackEntity;
 
+@SpringJUnitConfig(classes = { AlbumMapperImpl.class, TrackMapperImpl.class })
 class AlbumMapperTest {
+    @Autowired
+    private AlbumMapper albumMapper;
+
     @Test
     void mapsAlbumTracksToResponses() {
         TrackEntity track = mock(TrackEntity.class);
@@ -20,7 +27,7 @@ class AlbumMapperTest {
         AlbumEntity album = mock(AlbumEntity.class);
         when(album.getTracks()).thenReturn(List.of(track));
 
-        AlbumResponse response = AlbumMapper.INSTANCE.toResponse(album);
+        AlbumResponse response = albumMapper.toResponse(album);
 
         assertEquals(1, response.tracks().size());
         assertEquals(7, response.tracks().get(0).trackId());

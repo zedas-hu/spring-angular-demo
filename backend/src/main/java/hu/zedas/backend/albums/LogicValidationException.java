@@ -2,15 +2,15 @@ package hu.zedas.backend.albums;
 
 import org.springframework.http.HttpStatus;
 
-public class BusinessValidationException extends RuntimeException {
+public class LogicValidationException extends RuntimeException {
     private final String field;
     private final HttpStatus status;
 
-    public BusinessValidationException(String field, String message) {
+    public LogicValidationException(String field, String message) {
         this(field, message, HttpStatus.CONFLICT);
     }
 
-    public BusinessValidationException(String field, String message, HttpStatus status) {
+    public LogicValidationException(String field, String message, HttpStatus status) {
         super(message);
         this.field = field;
         this.status = status;

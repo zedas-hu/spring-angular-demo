@@ -2,7 +2,9 @@ package hu.zedas.backend.albums;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ class AlbumControllerTest {
 
     @Autowired
     private TrackRepository trackRepository;
+    
+    @Autowired
+    private AlbumRepository albumRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -37,9 +42,12 @@ class AlbumControllerTest {
 
         assertFalse(albumWithTracks.tracks().isEmpty());
 
-        AlbumResponse albumDetails = albumController.getAlbumById(albumWithTracks.albumId());
+        var albumDetails = albumController.getAlbumById(albumWithTracks.albumId());
 
-        assertEquals(albumWithTracks.tracks(), albumDetails.tracks());
+        assertEquals(HttpStatus.OK, albumDetails.getStatusCode());
+        AlbumResponse albumDetailBody = albumDetails.getBody();
+        assertNotNull(albumDetailBody);
+        assertEquals(albumWithTracks.tracks(), albumDetailBody.tracks());
     }
 
     @Test
@@ -100,7 +108,7 @@ class AlbumControllerTest {
         request.setArtistName("Unknown Artist");
         request.setTitle("Album with an invalid artist id");
 
-        var exception = assertThrows(BusinessValidationException.class,
+        var exception = assertThrows(LogicValidationException.class,
                 () -> albumController.createAlbum(request));
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
@@ -114,7 +122,7 @@ class AlbumControllerTest {
         request.setArtistName("Any Artist");
         request.setTitle(albumController.getAllAlbums().get(0).title());
 
-        assertThrows(BusinessValidationException.class, () -> albumController.createAlbum(request));
+        assertThrows(LogicValidationException.class, () -> albumController.createAlbum(request));
     }
 
     @Test
@@ -122,6 +130,7 @@ class AlbumControllerTest {
     void deletesAlbumAndItsTracks() {
         var album = albumController.getAllAlbums().stream()
                 .filter(candidate -> !candidate.tracks().isEmpty())
+                .filter(candidate -> trackRepository.countInvoiceItemsByAlbumId(candidate.albumId()) == 0)
                 .findFirst()
                 .orElseThrow();
         var trackIds = album.tracks().stream().map(track -> track.trackId()).toList();
@@ -131,5 +140,22 @@ class AlbumControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertFalse(albumRepository.existsById(album.albumId()));
         assertFalse(trackIds.stream().anyMatch(trackRepository::existsById));
+    }
+
+    @Test
+    @Transactional
+    void rejectsDeletingAlbumWithInvoicedTracks() {
+        var album = albumController.getAllAlbums().stream()
+                .filter(candidate -> trackRepository.countInvoiceItemsByAlbumId(candidate.albumId()) > 0)
+                .findFirst()
+                .orElseThrow();
+
+        var exception = assertThrows(
+                LogicValidationException.class,
+                () -> albumController.deleteAlbum(album.albumId()));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+        assertEquals("albumId", exception.getField());
+        assertTrue(albumRepository.existsById(album.albumId()));
     }
 }

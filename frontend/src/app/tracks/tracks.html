@@ -28,9 +28,11 @@
                     [checked]="tracksService.getDirection() === 'asc'" />{{ t('ASCENDING') }}</label>
             </app-popup>
 
-            <div class="new">
-                <a class="text-button" (click)="showNewAlbumDialog()" >{{ t('NEW_ALBUM') }} ✚</a>
-            </div>
+            @if (hasSession()) {
+                <div class="new">
+                    <a class="text-button" (click)="showNewAlbumDialog()">{{ t('NEW_ALBUM') }} ✚</a>
+                </div>
+            }
         }
     </header>
 
@@ -83,9 +85,9 @@
     @if (tracksService.displayedPage(); as page) {
         <button class="mover" (click)="firstPage()" [disabled]="page.first">❮❮</button>
         <button class="mover" (click)="previousPage()" [disabled]="page.first">❮</button>
-        <span>
-        @if (page.totalPages > 0) {{{ t('PAGE_OF', page.number + 1, page.totalPages) }}}
-        </span>
+        @if (page.totalPages > 0) {
+            <span>{{ t('PAGE_OF', page.number + 1, page.totalPages) }}</span>
+        }
         <button class="mover" (click)="nextPage()" [disabled]="page.last">❯</button>
         <button class="mover" (click)="lastPage()" [disabled]="page.last">❯❯</button>
     }
