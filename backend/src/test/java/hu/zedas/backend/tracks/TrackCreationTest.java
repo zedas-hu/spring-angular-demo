@@ -2,6 +2,7 @@ package hu.zedas.backend.tracks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,6 +15,7 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -143,6 +145,23 @@ class TrackCreationTest {
         assertEquals("TRACK_NAME_DUPLICATION", assertThrows(
                 LogicValidationException.class,
                 () -> trackController.updateTrack(duplicate.getTrackId(), request)).getMessage());
+    }
+
+    @Test
+    void listsAndGetsTracksWithLazyRelationsWhenRepositorySessionIsClosed() {
+        var page = trackController.getAllTracks(null, PageRequest.of(0, 20));
+        TrackResponse listedTrack = page.getContent().stream()
+                .filter(track -> track.albumId() != null && track.genreId() != null && track.mediaTypeId() != null)
+                .findFirst()
+                .orElseThrow();
+
+        TrackResponse details = trackController.getTrackById(listedTrack.trackId());
+
+        assertEquals(listedTrack, details);
+        assertNotNull(details.albumTitle());
+        assertNotNull(details.artistName());
+        assertNotNull(details.genreName());
+        assertNotNull(details.mediaTypeName());
     }
 
     @Test

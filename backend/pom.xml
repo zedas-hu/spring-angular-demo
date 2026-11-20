@@ -29,6 +29,7 @@
 	<properties>
 		<java.version>27</java.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
+		<backend.build.directory>${project.basedir}/target</backend.build.directory>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -77,6 +78,7 @@
 	</dependencies>
 
 	<build>
+		<directory>${backend.build.directory}</directory>
 		<plugins>
 		<plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -102,5 +104,14 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>mapper-recovery</id>
+			<properties>
+				<backend.build.directory>${project.basedir}/target-recovery</backend.build.directory>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
