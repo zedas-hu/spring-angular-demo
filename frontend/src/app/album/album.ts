@@ -65,6 +65,7 @@ export class Album {
 
     try {
       await this.albumService.deleteAlbum(albumId);
+      this.tracksService.refreshPage();
       await this.router.navigate(['/tracks']);
     } catch (error) {
       if (!(error instanceof Error)) {
@@ -81,7 +82,7 @@ export class Album {
 
     try {
       await this.tracksService.deleteTrack(trackId);
-      this.pageResource.reload();
+      this.reloadAlbumAndTracks();
     } catch (error) {
       if (!(error instanceof Error)) {
         throw error;
@@ -122,7 +123,7 @@ export class Album {
       dialog.instance.closed.subscribe(() => this.destroyNewTrackDialog());
       const reloadAlbum = () => {
         this.destroyNewTrackDialog();
-        this.pageResource.reload();
+        this.reloadAlbumAndTracks();
       };
       dialog.instance.created.subscribe(reloadAlbum);
       dialog.instance.updated.subscribe(reloadAlbum);
@@ -134,6 +135,11 @@ export class Album {
 
   private syncAlbum(): void {
     this.albumService.setCurrentAlbum(this.selectedAlbumId());
+  }
+
+  private reloadAlbumAndTracks(): void {
+    this.pageResource.reload();
+    this.tracksService.refreshPage();
   }
 
   private destroyNewTrackDialog(): void {

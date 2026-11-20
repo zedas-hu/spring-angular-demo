@@ -66,4 +66,40 @@ describe('TracksService', () => {
 
     expect(fetchMock).toHaveBeenCalledWith('/api/tracks/42', { method: 'DELETE' });
   });
+
+  it('refetches the current track page when refreshed', async () => {
+    TestBed.tick();
+    await vi.waitFor(() => expect(service.pageData.hasValue()).toBe(true));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    service.refreshPage();
+    TestBed.tick();
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(fetchMock.mock.calls[1][0]).toBe(fetchMock.mock.calls[0][0]);
+  });
+
+  it('moves to the last existing page when the current page is empty', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      const page = Number(new URL(url, 'http://localhost').searchParams.get('page'));
+      return {
+        ok: true,
+        json: async () => ({
+          content: page < 2 ? [{ trackId: page }] : [],
+          empty: page >= 2,
+          first: page === 0,
+          last: page === 1,
+          number: page,
+          numberOfElements: page < 2 ? 1 : 0,
+          totalElements: 2,
+          totalPages: 2,
+        }),
+      };
+    });
+
+    service.setCurrentPage(2);
+    TestBed.tick();
+
+    await vi.waitFor(() => expect(service.getCurrentPage()).toBe(1));
+  });
 });

@@ -121,7 +121,11 @@ export class TracksService {
       if (!response.ok)
         throw new Error('TRACKS_FETCH_ERROR');
 
-      return response.json();
+      const page: PageResponse<TrackRecord> = await response.json();
+      if (page.number > 0 && page.number >= page.totalPages) {
+        this.currentPage.set(Math.max(0, page.totalPages - 1));
+      }
+      return page;
     },
   });
   readonly displayedPage = linkedSignal<
@@ -131,6 +135,10 @@ export class TracksService {
     source: () => this.pageData.value(),
     computation: (page, previous) => page ?? previous?.value,
   });
+
+  refreshPage(): void {
+    this.pageData.reload();
+  }
 
   setCurrentPage(page: number): void {
     this.currentPage.set(Math.max(0, page));
