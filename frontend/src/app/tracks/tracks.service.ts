@@ -132,7 +132,7 @@ export class TracksService {
     PageResponse<TrackRecord> | undefined,
     PageResponse<TrackRecord> | undefined
   >({
-    source: () => this.pageData.value(),
+    source: () => this.pageData.hasValue() ? this.pageData.value() : undefined,
     computation: (page, previous) => page ?? previous?.value,
   });
 

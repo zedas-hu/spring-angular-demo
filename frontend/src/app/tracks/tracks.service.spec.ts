@@ -102,4 +102,31 @@ describe('TracksService', () => {
 
     await vi.waitFor(() => expect(service.getCurrentPage()).toBe(1));
   });
+
+  it('keeps the last loaded page when a later refresh fails', async () => {
+    fetchMock
+      .mockImplementationOnce(async () => ({
+        ok: true,
+        json: async () => ({
+          content: [{ trackId: 1 }],
+          empty: false,
+          first: true,
+          last: true,
+          number: 0,
+          numberOfElements: 1,
+          totalElements: 1,
+          totalPages: 1,
+        }),
+      }))
+      .mockImplementationOnce(async () => ({ ok: false, json: async () => ({}) }));
+
+    TestBed.tick();
+    await vi.waitFor(() => expect(service.displayedPage()?.content).toHaveLength(1));
+
+    service.refreshPage();
+    TestBed.tick();
+    await vi.waitFor(() => expect(service.pageData.error()).toBeTruthy());
+
+    expect(service.displayedPage()?.content[0].trackId).toBe(1);
+  });
 });

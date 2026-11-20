@@ -73,8 +73,10 @@ export class AlbumService {
     AlbumRecord | undefined,
     AlbumRecord | undefined
   >({
-    source: () => this.pageData.value(),
-    computation: (page, previous) => page ?? previous?.value,
+    source: () => this.pageData.hasValue() ? this.pageData.value() : undefined,
+    computation: (page, previous) => page ?? (
+      previous?.value?.albumId === this.currentAlbum() ? previous.value : undefined
+    ),
   });
 
   setCurrentAlbum(albumId: number | null): void {

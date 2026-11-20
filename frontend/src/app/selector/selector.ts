@@ -30,7 +30,7 @@ export class Selector implements FormValueControl<string> {
   constructor() {
     effect(() => {
       const value = this.value();
-      const keyList = this.keyList.value();
+      const keyList = this.currentKeyList();
       this.key.set(keyList?.find(o => o.value === value.trim())?.key);
     });
     effect(() => {
@@ -44,11 +44,15 @@ export class Selector implements FormValueControl<string> {
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.value.set(value);
-    this.key.set(this.keyList.value()?.find(o => o.value === value.trim())?.key);
+    this.key.set(this.currentKeyList()?.find(o => o.value === value.trim())?.key);
   }
 
   onBlur(): void {
     this.touch.emit();
+  }
+
+  private currentKeyList(): KeyRecord[] | undefined {
+    return this.keyList.hasValue() ? this.keyList.value() : undefined;
   }
 
 }

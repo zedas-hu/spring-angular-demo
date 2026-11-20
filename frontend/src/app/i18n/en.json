@@ -68,6 +68,7 @@
   "INVALID_ALBUM_ID": "Invalid album ID.",
   "LOADING_ALBUM": "Loading album...",
   "LOAD_ALBUM_FAILED": "Could not load album.",
+  "RETRY": "Retry",
   "PAGE_OF": "Page $1 of $2",
   "LANG_HU": "Magyar",
   "LANG_EN": "English",

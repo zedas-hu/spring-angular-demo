@@ -1,7 +1,8 @@
 <main>
-  @if (!selectedAlbumId()) {
+  @if (selectedAlbumId() && pageResource.error()) {
+    <p class="load-error">{{ t('LOAD_ALBUM_FAILED') }} <button class="text-button" (click)="pageResource.reload()">{{ t('RETRY') }}</button></p>
   }
-  @else if (pageResource.error()) {
+  @if (!selectedAlbumId()) {
   }
   @else if (pageResource.isLoading()) {
     <p>{{ t('LOADING_ALBUM') }}</p>

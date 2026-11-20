@@ -20,8 +20,19 @@ h6 {
   padding: 0;
 }
 
-*:focus-visible {
+*:not(input):not(button):focus-visible {
   outline: 1.5px solid var(--line-color) !important;
+}
+
+input:focus-visible {
+  outline: none;
+  border-bottom-color: var(--line-color) !important;
+}
+
+button:focus-visible {
+  outline: none;
+  background-color: var(--button-background) !important;
+  border-radius: 0.5rem !important;
 }
 
 :root {
@@ -64,6 +75,16 @@ h6 {
   &.small {
     font-size: 1.25rem;
     padding: 0;
+  }
+}
+
+.load-error {
+  color: var(--error_color);
+  font-size: 1.2rem;
+  margin: 0.5rem;
+
+  .text-button {
+    font-size: inherit;
   }
 }
 
@@ -111,7 +132,7 @@ h6 {
     input {
       background: transparent;
       border: none;
-      border-bottom: 1px dotted var(--line-color2);
+      border-bottom: 1.5px dotted var(--line-color2);
       outline: none;
       font-size: 1.25rem;
       margin-top: 0.25rem;
@@ -121,7 +142,7 @@ h6 {
     select {
       background: transparent;
       border: none;
-      border-bottom: 1px dotted var(--line-color2);
+      border-bottom: 1.5px dotted var(--line-color2);
       color: var(--font-color);
       font: inherit;
       margin-top: 0.25rem;

@@ -43,4 +43,22 @@ describe('Album', () => {
 
     await expect(service.deleteAlbum(42)).rejects.toThrow('ALBUM_DELETE_REFERENCED');
   });
+
+  it('does not show the previous album when loading another album fails', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => (
+      url.endsWith('/1')
+        ? { ok: true, json: async () => ({ albumId: 1, title: 'First', artistId: 1, artistName: 'Artist', tracks: [] }) }
+        : { ok: false, json: async () => ({}) }
+    )));
+
+    service.setCurrentAlbum(1);
+    TestBed.tick();
+    await vi.waitFor(() => expect(service.displayedPage()?.albumId).toBe(1));
+
+    service.setCurrentAlbum(2);
+    TestBed.tick();
+    await vi.waitFor(() => expect(service.pageData.error()).toBeTruthy());
+
+    expect(service.displayedPage()).toBeUndefined();
+  });
 });

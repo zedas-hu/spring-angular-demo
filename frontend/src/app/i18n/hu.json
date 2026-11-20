@@ -68,6 +68,7 @@
   "INVALID_ALBUM_ID": "Érvénytelen albumazonosító.",
   "LOADING_ALBUM": "Album betöltése...",
   "LOAD_ALBUM_FAILED": "Az album betöltése nem sikerült.",
+  "RETRY": "Újrapróbálás",
   "PAGE_OF": "Oldal $1 / $2",
   "LANG_HU": "Magyar",
   "LANG_EN": "English",

@@ -56,10 +56,11 @@
                 </tr>
             </thead>
             <tbody>
+            @if (pageResource.error()) {
+                <tr class="load-error"><td colspan="5">{{ t('LOAD_TRACKS_FAILED') }} <button class="text-button" (click)="tracksService.refreshPage()">{{ t('RETRY') }}</button></td></tr>
+            }
             @if (!tracksService.displayedPage() && pageResource.isLoading()) {
                 <tr><td colspan="5">{{ t('LOADING_TRACKS') }}</td></tr>
-            }
-            @else if (pageResource.error()) {
             }
             @else if (tracksService.displayedPage(); as page) {
                 @if (page.content.length === 0) {
