@@ -24,12 +24,12 @@ export class NewAlbumComponent {
   private readonly api = inject(ApiService);
   private readonly translations = inject(TranslationService);
   private readonly messages = inject(MessagesService);
-  private dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
+  private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
   private readonly albumModel = signal<NewAlbumModel>({ title: '', artistName: '', artistId: null });
 
-  closed = output<void>();
-  created = output<number>();
-  existingAlbum = output<number>();
+  readonly closed = output<void>();
+  readonly created = output<number>();
+  readonly existingAlbum = output<number>();
 
   readonly formError = signal<string | null>(null);
   private readonly duplicateMatch = signal<{ title: string; albumId: number | null } | null>(null);
@@ -41,7 +41,6 @@ export class NewAlbumComponent {
   readonly artistKeyProvider = new KeyProvider(this.api, 'artists');
   private readonly albumKeyProvider = new KeyProvider(this.api, 'albums');
 
-  // readonly t = (code?: string) => this.translations.translate(code ?? '');
   readonly t: Translator = this.translations.translate.bind(this.translations);
 
   readonly albumForm = form(

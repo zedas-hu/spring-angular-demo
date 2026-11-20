@@ -6,7 +6,7 @@ import { Component, input } from '@angular/core';
   templateUrl: './popup.html',
 })
 export class Popup {
-  className = input.required<String>({ alias: 'class' });
-  text = input.required<String>();
-  uniqueId = crypto.randomUUID();
+  className = input.required<string>({ alias: 'class' });
+  text = input.required<string>();
+  readonly uniqueId = crypto.randomUUID();
 }

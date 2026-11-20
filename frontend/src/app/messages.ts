@@ -29,7 +29,7 @@ export class Message {
     this.timer = timer;
     this.element = this.container.ownerDocument.createElement('div');
     this.element.className = `message message_${type}`;
-    this.element.innerHTML = html.replace(/\$C/, String(timer));
+    this.element.textContent = html.replace(/\$C/, String(timer));
     this.element.addEventListener('click', () => {
       this.timer = 1;
       this.clickCallback?.();
@@ -44,7 +44,7 @@ export class Message {
   setHTML(html: string): void {
     this.html = html;
     this.timer = this.startTimer - 1;
-    this.element.innerHTML = html;
+    this.element.textContent = html;
   }
 
   tick(): boolean {
@@ -64,7 +64,7 @@ export class Message {
     }
 
     if (this.html.includes('$C')) {
-      this.element.innerHTML = this.html.replace(/\$C/, String(this.timer));
+      this.element.textContent = this.html.replace(/\$C/, String(this.timer));
     }
     return false;
   }
