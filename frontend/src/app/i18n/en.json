@@ -22,7 +22,7 @@
   "DURATION_FORMAT": "Enter the duration as minutes:seconds (for example, 3:45).",
   "DURATION_RANGE": "The duration must be greater than zero and within the supported range.",
   "COMPOSER_TOO_LONG": "The composer can be at most 220 characters.",
-  "UNIT_PRICE_INVALID": "Enter a non-negative price with at most two decimal places.",
+  "UNIT_PRICE_INVALID": "Enter a non-negative price with at most 8 whole digits and 2 decimal places.",
   "SELECT_GENRE": "Select a genre",
   "SELECT_MEDIA_TYPE": "Select a media type",
   "UNIT_PRICE": "Unit price",

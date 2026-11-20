@@ -128,6 +128,58 @@ describe('NewTrack', () => {
     expect(fixture.nativeElement.textContent).toContain('A track with the same name already exists in this album.');
   });
 
+  it('accepts the largest unit price the backend accepts', async () => {
+    setValue('track-name', 'New track');
+    setValue('track-genre', '2');
+    setValue('track-media-type', '1');
+    setValue('track-duration', '3:45');
+    setValue('track-unit-price', '99999999.99');
+    await submit();
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/tracks', expect.objectContaining({
+      method: 'POST',
+      body: expect.stringContaining('"unitPrice":99999999.99'),
+    }));
+  });
+
+  it('rejects a unit price with more than 8 whole digits before submitting', async () => {
+    setValue('track-name', 'New track');
+    setValue('track-genre', '2');
+    setValue('track-media-type', '1');
+    setValue('track-duration', '3:45');
+    setValue('track-unit-price', '100000000');
+    (fixture.nativeElement.querySelector('#track-unit-price') as HTMLInputElement).dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    await submit();
+
+    expect(fetchMock).not.toHaveBeenCalledWith('/api/tracks', expect.anything());
+    expect(fixture.nativeElement.textContent).toContain('Enter a non-negative price with at most 8 whole digits and 2 decimal places.');
+  });
+
+  it('shows the server unit price error next to the price field', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url === '/api/genres') {
+        return jsonResponse(200, [{ genreId: 2, name: 'Rock' }]);
+      }
+      if (url === '/api/media-types') {
+        return jsonResponse(200, [{ mediaTypeId: 1, name: 'MPEG audio file' }]);
+      }
+      return jsonResponse(400, {
+        detail: 'Validation failed',
+        fieldErrors: { unitPrice: 'UNIT_PRICE_INVALID' },
+      });
+    });
+
+    setValue('track-name', 'New track');
+    setValue('track-genre', '2');
+    setValue('track-media-type', '1');
+    setValue('track-duration', '3:45');
+    await submit();
+
+    expect(fixture.nativeElement.querySelector('.field-error').textContent).toContain('Enter a non-negative price with at most 8 whole digits and 2 decimal places.');
+    expect(fixture.nativeElement.textContent).not.toContain('Validation failed');
+  });
+
   it('updates an existing track and preserves its exact duration when unchanged', async () => {
     const updated = vi.fn();
     fixture.componentInstance.updated.subscribe(updated);

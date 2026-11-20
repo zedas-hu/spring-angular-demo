@@ -1,4 +1,4 @@
-import { Component, effect, ElementRef, viewChild, output, inject, signal, untracked } from '@angular/core';
+import { computed, Component, effect, ElementRef, viewChild, output, inject, signal, untracked } from '@angular/core';
 import { form, FormField, FormRoot, required, validate, type FieldTree, type TreeValidationResult } from '@angular/forms/signals';
 import { AlbumCreateError, AlbumService } from '../album/album.service';
 import { TranslationService, Translator } from '../i18n/translation.service';
@@ -30,7 +30,12 @@ export class NewAlbumComponent {
   existingAlbum = output<number>();
 
   readonly formError = signal<string | null>(null);
-  readonly duplicateAlbumId = signal<number | null>(null);
+  private readonly duplicateMatch = signal<{ title: string; albumId: number | null } | null>(null);
+  // The match is shown only while the entered title is still the one it was found for.
+  readonly duplicateAlbumId = computed(() => {
+    const match = this.duplicateMatch();
+    return match && match.title === this.albumModel().title.trim() ? match.albumId : null;
+  });
   readonly artistKeyProvider = new KeyProvider('artists');
   private readonly albumKeyProvider = new KeyProvider('albums');
 
@@ -70,7 +75,7 @@ export class NewAlbumComponent {
   private async createAlbum(): Promise<TreeValidationResult> {
     const { title, artistName, artistId: selectedArtistId } = this.albumForm().value();
     this.formError.set(null);
-    this.duplicateAlbumId.set(null);
+    this.duplicateMatch.set(null);
 
     // The selector may not have loaded the artist list yet, so resolve the name here before the backend creates an artist.
     let artistId = selectedArtistId;
@@ -103,8 +108,13 @@ export class NewAlbumComponent {
 
       if (error.detail === 'TITLE_DUPLICATION') {
         try {
+          // The backend stores the stripped title, so the lookup must use the same form.
+          const trimmedTitle = title.trim();
           const albums = await this.albumKeyProvider.getKeyList();
-          this.duplicateAlbumId.set(albums.find((album) => album.value === title)?.key ?? null);
+          this.duplicateMatch.set({
+            title: trimmedTitle,
+            albumId: albums.find((album) => album.value === trimmedTitle)?.key ?? null,
+          });
         } catch (lookupError) {
           if (!(lookupError instanceof Error)) {
             throw lookupError;

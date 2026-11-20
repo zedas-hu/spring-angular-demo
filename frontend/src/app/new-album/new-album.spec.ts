@@ -194,4 +194,42 @@ describe('NewAlbumComponent', () => {
       body: JSON.stringify({ title: 'New', artistName: 'Artist', artistId: 3 }),
     }));
   });
+
+  it('opens the existing album when the title has surrounding spaces', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url === '/api/albums/keys') {
+        return jsonResponse(200, [{ key: 9, value: 'New' }]);
+      }
+      return jsonResponse(409, { detail: 'TITLE_DUPLICATION', fieldErrors: { title: 'TITLE_DUPLICATION' } });
+    });
+    const existingAlbum = vi.fn();
+    fixture.componentInstance.existingAlbum.subscribe(existingAlbum);
+
+    typeInto('album-title', '  New  ');
+    typeInto('album-artist', 'Artist');
+    await submit();
+
+    const openExistingButton = fixture.nativeElement.querySelector('.existing-album-button') as HTMLButtonElement;
+    expect(openExistingButton).not.toBeNull();
+    openExistingButton.click();
+    expect(existingAlbum).toHaveBeenCalledWith(9);
+  });
+
+  it('hides the existing album button once the title is changed', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url === '/api/albums/keys') {
+        return jsonResponse(200, [{ key: 9, value: 'New' }]);
+      }
+      return jsonResponse(409, { detail: 'TITLE_DUPLICATION', fieldErrors: { title: 'TITLE_DUPLICATION' } });
+    });
+
+    typeInto('album-title', 'New');
+    typeInto('album-artist', 'Artist');
+    await submit();
+    expect(fixture.nativeElement.querySelector('.existing-album-button')).not.toBeNull();
+
+    typeInto('album-title', 'Another title');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.existing-album-button')).toBeNull();
+  });
 });

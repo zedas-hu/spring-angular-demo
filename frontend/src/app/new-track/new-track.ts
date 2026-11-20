@@ -113,7 +113,7 @@ export class NewTrack {
       );
       validate(path.unitPrice, ({ value }) => {
         const price = value();
-        return Number.isFinite(price) && price >= 0 && Math.abs(price * 100 - Math.round(price * 100)) < 1e-8
+        return Number.isFinite(price) && price >= 0 && price <= 99999999.99 && Math.abs(price * 100 - Math.round(price * 100)) < 1e-8
           ? undefined
           : { kind: 'price', message: 'UNIT_PRICE_INVALID' };
       });
@@ -198,12 +198,13 @@ export class NewTrack {
         return undefined;
       }
 
-      const fields: Record<string, FieldTree<string>> = {
+      const fields: Record<string, FieldTree<string> | FieldTree<number>> = {
         name: this.trackForm.name,
         genreId: this.trackForm.genreId,
         mediaTypeId: this.trackForm.mediaTypeId,
         milliseconds: this.trackForm.duration,
         composer: this.trackForm.composer,
+        unitPrice: this.trackForm.unitPrice,
       };
       const fieldErrors = Object.entries(error.fieldErrors)
         .filter(([name]) => name in fields)
