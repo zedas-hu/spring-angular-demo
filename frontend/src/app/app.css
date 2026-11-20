@@ -8,6 +8,8 @@ nav {
     text-box: trim-both text;
     margin: 0;
     padding: 0 0.5rem;
+    top: 0;
+    position: sticky;
 
     --text-button-color: var(--nav-color);
     --popup-background: var(--nav-background);
