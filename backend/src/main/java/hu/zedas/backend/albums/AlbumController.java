@@ -45,7 +45,7 @@ public class AlbumController {
 
     @GetMapping("/keys")
     public List<KeyResponse> getAllAlbumKeys() {
-        return albumRepository.findAll().stream()
+        return albumRepository.findAllKeyProjections().stream()
                 .map(album -> new KeyResponse(album.getAlbumId(), album.getTitle()))
                 .toList();
     }

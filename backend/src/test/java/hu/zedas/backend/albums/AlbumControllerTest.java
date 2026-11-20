@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
+import hu.zedas.backend.KeyResponse;
 import hu.zedas.backend.artists.ArtistRepository;
 import hu.zedas.backend.tracks.TrackRepository;
 
@@ -48,6 +52,18 @@ class AlbumControllerTest {
         AlbumResponse albumDetailBody = albumDetails.getBody();
         assertNotNull(albumDetailBody);
         assertEquals(albumWithTracks.tracks(), albumDetailBody.tracks());
+    }
+
+    @Test
+    void albumKeysListEveryAlbumAsIdAndTitle() {
+        var expected = albumRepository.findAll().stream()
+                .map(album -> new KeyResponse(album.getAlbumId(), album.getTitle()))
+                .collect(Collectors.toSet());
+
+        var keys = albumController.getAllAlbumKeys();
+
+        assertEquals(expected.size(), keys.size());
+        assertEquals(expected, new HashSet<>(keys));
     }
 
     @Test
