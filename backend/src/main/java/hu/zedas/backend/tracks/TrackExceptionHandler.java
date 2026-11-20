@@ -1,31 +1,12 @@
 package hu.zedas.backend.tracks;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import hu.zedas.backend.albums.LogicValidationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import hu.zedas.backend.AbstractValidationExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice(assignableTypes = TrackController.class)
-public class TrackExceptionHandler {
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidation(MethodArgumentNotValidException ex) {
-        Map<String, String> fieldErrors = new LinkedHashMap<>();
-        ex.getBindingResult().getFieldErrors()
-                .forEach(error -> fieldErrors.putIfAbsent(error.getField(), error.getDefaultMessage()));
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "INVALID_TRACK_DATA");
-        problem.setProperty("fieldErrors", fieldErrors);
-        return problem;
-    }
+public class TrackExceptionHandler extends AbstractValidationExceptionHandler {
 
-    @ExceptionHandler(LogicValidationException.class)
-    public ProblemDetail handleBusinessValidation(LogicValidationException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
-        problem.setProperty("fieldErrors", Map.of(ex.getField(), ex.getMessage()));
-        return problem;
+    public TrackExceptionHandler() {
+        super("INVALID_TRACK_DATA");
     }
 }
