@@ -116,6 +116,33 @@ class TrackCreationTest {
 
     @Test
     @Transactional
+    void updatesDetailsOfTracksThatAlreadyShareTheirNameButRejectsRenamingThemToADuplicate() {
+        TrackEntity duplicate = tracksRepository.findAll().stream()
+                .filter(track -> track.getAlbum() != null)
+                .filter(track -> tracksRepository.existsByAlbum_AlbumIdAndNameIgnoreCaseAndTrackIdNot(
+                        track.getAlbum().getAlbumId(), track.getName(), track.getTrackId()))
+                .findFirst()
+                .orElseThrow();
+        TrackPostRequest request = new TrackPostRequest();
+        request.setName(duplicate.getName());
+        request.setAlbumId(duplicate.getAlbum().getAlbumId());
+        request.setGenreId(duplicate.getGenre().getGenreId());
+        request.setMediaTypeId(duplicate.getMediaType().getMediaTypeId());
+        request.setComposer("Composer of duplicate");
+        request.setMilliseconds(duplicate.getMilliseconds());
+        request.setUnitPrice(duplicate.getUnitPrice());
+
+        assertEquals("Composer of duplicate",
+                trackController.updateTrack(duplicate.getTrackId(), request).composer());
+
+        request.setName(duplicate.getName().toUpperCase());
+        assertEquals("TRACK_NAME_DUPLICATION", assertThrows(
+                LogicValidationException.class,
+                () -> trackController.updateTrack(duplicate.getTrackId(), request)).getMessage());
+    }
+
+    @Test
+    @Transactional
     void deletesTrackAndReturnsNotFoundWhenItDoesNotExist() {
         TrackEntity referenced = tracksRepository.findAll().stream()
                 .filter(track -> tracksRepository.countInvoiceItems(track.getTrackId()) > 0)

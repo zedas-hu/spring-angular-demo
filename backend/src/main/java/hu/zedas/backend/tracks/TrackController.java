@@ -1,6 +1,7 @@
 package hu.zedas.backend.tracks;
 
 import java.net.URI;
+import java.util.Objects;
 import java.util.Set;
 
 import hu.zedas.backend.albums.AlbumEntity;
@@ -86,7 +87,11 @@ public class TrackController {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "TRACK_NOT_FOUND"));
         AlbumEntity album = albumRepository.findById(request.getAlbumId()).orElseThrow(
                 () -> new LogicValidationException("albumId", "ALBUM_NOT_FOUND", HttpStatus.BAD_REQUEST));
-        if (tracksRepository.existsByAlbum_AlbumIdAndNameIgnoreCaseAndTrackIdNot(
+        boolean sameAlbumAndName = track.getAlbum() != null
+                && track.getAlbum().getAlbumId().equals(album.getAlbumId())
+                && Objects.equals(track.getName(), request.getName());
+        // Unchanged name and album were already accepted, so existing duplicates stay editable.
+        if (!sameAlbumAndName && tracksRepository.existsByAlbum_AlbumIdAndNameIgnoreCaseAndTrackIdNot(
                 album.getAlbumId(), request.getName(), id)) {
             throw new LogicValidationException("name", "TRACK_NAME_DUPLICATION");
         }
