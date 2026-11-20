@@ -1,16 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { vi } from 'vitest';
+import { HttpRequest } from '@angular/common/http';
+import { Mock, vi } from 'vitest';
 import { NewAlbumComponent } from './new-album';
+import { ApiStubHandler, ApiStubResponse, provideApiStub } from '../testing/api-stub';
 
 describe('NewAlbumComponent', () => {
   let fixture: ComponentFixture<NewAlbumComponent>;
-  let fetchMock: ReturnType<typeof vi.fn>;
+  let apiMock: Mock<ApiStubHandler>;
 
-  const jsonResponse = (status: number, body: unknown) => ({
-    ok: status < 400,
-    status,
-    json: async () => body,
-  });
   const typeInto = (id: string, value: string) => {
     const input = fixture.nativeElement.querySelector(`#${id}`) as HTMLInputElement;
     input.value = value;
@@ -24,25 +21,22 @@ describe('NewAlbumComponent', () => {
   };
 
   beforeEach(async () => {
-    fetchMock = vi.fn(async (url: string) => {
+    apiMock = vi.fn<ApiStubHandler>(({ url }: HttpRequest<unknown>) => {
       if (url === '/api/artists/keys') {
-        return jsonResponse(200, [{ key: 3, value: 'Artist' }]);
+        return { body: [{ key: 3, value: 'Artist' }] };
       }
       if (url === '/api/albums/keys') {
-        return jsonResponse(200, [{ key: 9, value: 'New' }]);
+        return { body: [{ key: 9, value: 'New' }] };
       }
-      return jsonResponse(201, {
-        albumId: 9,
-        title: 'New',
-        artistId: 3,
-        artistName: 'Artist',
-        tracks: [],
-      });
+      return {
+        status: 201,
+        body: { albumId: 9, title: 'New', artistId: 3, artistName: 'Artist', tracks: [] },
+      };
     });
-    vi.stubGlobal('fetch', fetchMock);
 
     await TestBed.configureTestingModule({
       imports: [NewAlbumComponent],
+      providers: [provideApiStub(apiMock)],
     }).compileComponents();
 
     fixture = TestBed.createComponent(NewAlbumComponent);
@@ -51,12 +45,8 @@ describe('NewAlbumComponent', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   it('creates the album with the selected artist ID and emits its ID', async () => {
-    fetchMock.mockResolvedValue(jsonResponse(201, { albumId: 9, title: 'New', artistId: 3, artistName: 'Artist', tracks: [] }));
+    apiMock.mockReturnValue({ status: 201, body: { albumId: 9, title: 'New', artistId: 3, artistName: 'Artist', tracks: [] } });
     const created = vi.fn();
     fixture.componentInstance.created.subscribe(created);
 
@@ -66,9 +56,10 @@ describe('NewAlbumComponent', () => {
     expect((fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement).disabled).toBe(false);
     await submit();
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/albums', expect.objectContaining({
+    expect(apiMock).toHaveBeenCalledWith(expect.objectContaining({
       method: 'POST',
-      body: JSON.stringify({ title: 'New', artistName: 'Artist', artistId: 3 }),
+      url: '/api/albums',
+      body: { title: 'New', artistName: 'Artist', artistId: 3 },
     }));
     expect(fixture.nativeElement.querySelector('.field-warning')).toBeNull();
     expect(created).toHaveBeenCalledWith(9);
@@ -79,9 +70,10 @@ describe('NewAlbumComponent', () => {
     typeInto('album-artist', 'A new artist');
     await submit();
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/albums', expect.objectContaining({
+    expect(apiMock).toHaveBeenCalledWith(expect.objectContaining({
       method: 'POST',
-      body: JSON.stringify({ title: 'New', artistName: 'A new artist', artistId: null }),
+      url: '/api/albums',
+      body: { title: 'New', artistName: 'A new artist', artistId: null },
     }));
     expect(fixture.nativeElement.querySelector('.field-warning').textContent).toContain(
       'No existing artist has this name; a new artist will be created.',
@@ -89,14 +81,17 @@ describe('NewAlbumComponent', () => {
   });
 
   it('shows server field errors next to the matching field', async () => {
-    fetchMock.mockImplementation(async (url: string) => {
+    apiMock.mockImplementation(({ url }: HttpRequest<unknown>) => {
       if (url === '/api/albums/keys') {
-        return jsonResponse(200, [{ key: 9, value: 'New' }]);
+        return { body: [{ key: 9, value: 'New' }] };
       }
-      return jsonResponse(409, {
-        detail: 'TITLE_DUPLICATION',
-        fieldErrors: { title: 'TITLE_DUPLICATION' },
-      });
+      return {
+        status: 409,
+        body: {
+          detail: 'TITLE_DUPLICATION',
+          fieldErrors: { title: 'TITLE_DUPLICATION' },
+        },
+      };
     });
 
     typeInto('album-title', 'New');
@@ -108,7 +103,7 @@ describe('NewAlbumComponent', () => {
     const errors = fixture.nativeElement.querySelectorAll('.field-error');
     expect(errors.length).toBe(1);
     expect(errors[0].textContent).toContain('An album with the same title already exists.');
-    expect(fetchMock).toHaveBeenCalledWith('/api/albums/keys');
+    expect(apiMock).toHaveBeenCalledWith(expect.objectContaining({ url: '/api/albums/keys' }));
     expect(fixture.nativeElement.querySelector('#album-title').getAttribute('aria-invalid')).toBe('true');
     const openExistingButton = fixture.nativeElement.querySelector('.existing-album-button') as HTMLButtonElement;
     expect(openExistingButton.textContent).toContain('Open existing album');
@@ -124,8 +119,8 @@ describe('NewAlbumComponent', () => {
     fixture.detectChanges();
     await submit();
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/artists/keys');
-    expect(fetchMock).not.toHaveBeenCalledWith('/api/albums', expect.anything());
+    expect(apiMock).toHaveBeenCalledWith(expect.objectContaining({ url: '/api/artists/keys' }));
+    expect(apiMock).not.toHaveBeenCalledWith(expect.objectContaining({ url: '/api/albums' }));
     expect((fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement).disabled).toBe(true);
     expect(fixture.nativeElement.querySelectorAll('.field-error').length).toBe(2);
   });
@@ -137,7 +132,7 @@ describe('NewAlbumComponent', () => {
     fixture.detectChanges();
     await submit();
 
-    expect(fetchMock).not.toHaveBeenCalledWith('/api/albums', expect.anything());
+    expect(apiMock).not.toHaveBeenCalledWith(expect.objectContaining({ url: '/api/albums' }));
     expect(fixture.nativeElement.querySelectorAll('.field-error').length).toBe(1);
     expect(fixture.nativeElement.querySelectorAll('.field-error')[0].textContent).toContain('Enter an artist name.');
   });
@@ -153,11 +148,14 @@ describe('NewAlbumComponent', () => {
   });
 
   it('does not create an artist when the artist list cannot be loaded', async () => {
-    fetchMock.mockImplementation(async (url: string) => {
+    apiMock.mockImplementation(({ url }: HttpRequest<unknown>) => {
       if (url === '/api/artists/keys') {
-        return jsonResponse(500, {});
+        return { status: 500, body: {} };
       }
-      return jsonResponse(201, { albumId: 9, title: 'New', artistId: null, artistName: 'A new artist', tracks: [] });
+      return {
+        status: 201,
+        body: { albumId: 9, title: 'New', artistId: null, artistName: 'A new artist', tracks: [] },
+      };
     });
     fixture = TestBed.createComponent(NewAlbumComponent);
     fixture.detectChanges();
@@ -167,17 +165,20 @@ describe('NewAlbumComponent', () => {
     typeInto('album-artist', 'A new artist');
     await submit();
 
-    expect(fetchMock).not.toHaveBeenCalledWith('/api/albums', expect.anything());
+    expect(apiMock).not.toHaveBeenCalledWith(expect.objectContaining({ url: '/api/albums' }));
     expect(fixture.componentInstance.formError()).toBe('ARTIST_LOOKUP_FAILED');
   });
 
   it('uses the matching artist ID when the name was entered before the artist list loaded', async () => {
-    let resolveArtists!: (response: unknown) => void;
-    fetchMock.mockImplementation(async (url: string) => {
+    let resolveArtists!: (response: ApiStubResponse) => void;
+    apiMock.mockImplementation(({ url }: HttpRequest<unknown>) => {
       if (url === '/api/artists/keys') {
         return new Promise(resolve => { resolveArtists = resolve; });
       }
-      return jsonResponse(201, { albumId: 9, title: 'New', artistId: 3, artistName: 'Artist', tracks: [] });
+      return {
+        status: 201,
+        body: { albumId: 9, title: 'New', artistId: 3, artistName: 'Artist', tracks: [] },
+      };
     });
     fixture = TestBed.createComponent(NewAlbumComponent);
     fixture.detectChanges();
@@ -186,21 +187,22 @@ describe('NewAlbumComponent', () => {
     typeInto('album-artist', 'Artist');
     fixture.detectChanges();
     (fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement).click();
-    resolveArtists(jsonResponse(200, [{ key: 3, value: 'Artist' }]));
+    resolveArtists({ body: [{ key: 3, value: 'Artist' }] });
     await new Promise(resolve => setTimeout(resolve));
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/albums', expect.objectContaining({
+    expect(apiMock).toHaveBeenCalledWith(expect.objectContaining({
       method: 'POST',
-      body: JSON.stringify({ title: 'New', artistName: 'Artist', artistId: 3 }),
+      url: '/api/albums',
+      body: { title: 'New', artistName: 'Artist', artistId: 3 },
     }));
   });
 
   it('opens the existing album when the title has surrounding spaces', async () => {
-    fetchMock.mockImplementation(async (url: string) => {
+    apiMock.mockImplementation(({ url }: HttpRequest<unknown>) => {
       if (url === '/api/albums/keys') {
-        return jsonResponse(200, [{ key: 9, value: 'New' }]);
+        return { body: [{ key: 9, value: 'New' }] };
       }
-      return jsonResponse(409, { detail: 'TITLE_DUPLICATION', fieldErrors: { title: 'TITLE_DUPLICATION' } });
+      return { status: 409, body: { detail: 'TITLE_DUPLICATION', fieldErrors: { title: 'TITLE_DUPLICATION' } } };
     });
     const existingAlbum = vi.fn();
     fixture.componentInstance.existingAlbum.subscribe(existingAlbum);
@@ -216,11 +218,11 @@ describe('NewAlbumComponent', () => {
   });
 
   it('hides the existing album button once the title is changed', async () => {
-    fetchMock.mockImplementation(async (url: string) => {
+    apiMock.mockImplementation(({ url }: HttpRequest<unknown>) => {
       if (url === '/api/albums/keys') {
-        return jsonResponse(200, [{ key: 9, value: 'New' }]);
+        return { body: [{ key: 9, value: 'New' }] };
       }
-      return jsonResponse(409, { detail: 'TITLE_DUPLICATION', fieldErrors: { title: 'TITLE_DUPLICATION' } });
+      return { status: 409, body: { detail: 'TITLE_DUPLICATION', fieldErrors: { title: 'TITLE_DUPLICATION' } } };
     });
 
     typeInto('album-title', 'New');

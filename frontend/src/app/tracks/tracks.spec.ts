@@ -1,17 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal, type WritableSignal } from '@angular/core';
+import { HttpParams, HttpRequest } from '@angular/common/http';
 import { By } from '@angular/platform-browser';
-import { vi } from 'vitest';
+import { Mock, vi } from 'vitest';
 import { provideRouter, Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { Tracks } from './tracks';
 import { PageResponse, TrackRecord, TracksService } from './tracks.service';
 import { NewAlbumComponent } from '../new-album/new-album';
 import { LoginService } from '../login/login.service';
+import { ApiStubHandler, provideApiStub } from '../testing/api-stub';
 
 describe('Tracks', () => {
   let component: Tracks;
   let fixture: ComponentFixture<Tracks>;
-  let fetchMock: ReturnType<typeof vi.fn>;
+  let apiMock: Mock<ApiStubHandler>;
   let hasSession: WritableSignal<boolean>;
   const pageResponse = (number: number, last: boolean): PageResponse<TrackRecord> => ({
     content: [],
@@ -23,23 +26,22 @@ describe('Tracks', () => {
     totalElements: last ? number * TracksService.pageSize : (number + 2) * TracksService.pageSize,
     totalPages: last ? number + 1 : number + 2,
   });
-  const lastRequestParams = (): URLSearchParams => {
-    const [url] = fetchMock.mock.calls.at(-1)!;
-    return new URL(url as string, 'http://localhost').searchParams;
+  const lastRequestParams = (): HttpParams => {
+    const [request] = apiMock.mock.calls.at(-1)! as [HttpRequest<unknown>];
+    return request.params;
   };
 
   beforeEach(async () => {
     hasSession = signal(false);
-    fetchMock = vi.fn(async (url: string) => ({
-      ok: true,
-      json: async () => pageResponse(Number(new URL(url, 'http://localhost').searchParams.get('page')), false),
+    apiMock = vi.fn<ApiStubHandler>(({ params }: HttpRequest<unknown>) => ({
+      body: pageResponse(Number(params.get('page')), false),
     }));
-    vi.stubGlobal('fetch', fetchMock);
 
     await TestBed.configureTestingModule({
       imports: [Tracks],
       providers: [
         provideRouter([]),
+        provideApiStub(apiMock),
         { provide: LoginService, useValue: { hasSession } },
       ],
     }).compileComponents();
@@ -48,10 +50,6 @@ describe('Tracks', () => {
     fixture = TestBed.createComponent(Tracks);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   it('should create', async () => {
@@ -87,10 +85,7 @@ describe('Tracks', () => {
   });
 
   it('hides the page number when the page count is zero', async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({ ...pageResponse(0, true), totalElements: 0, totalPages: 0 }),
-    });
+    apiMock.mockReturnValue({ body: { ...pageResponse(0, true), totalElements: 0, totalPages: 0 } });
     TestBed.inject(TracksService).setFilter('empty');
     await fixture.whenStable();
     fixture.detectChanges();
@@ -113,26 +108,22 @@ describe('Tracks', () => {
   it('aborts the previous search request when the filter changes while loading', async () => {
     await fixture.whenStable();
     const tracksService = TestBed.inject(TracksService);
-    let firstRequestSignal: AbortSignal | undefined;
-    fetchMock
-      .mockImplementationOnce((_url: string, options: RequestInit) => new Promise((_resolve, reject) => {
-        firstRequestSignal = options.signal as AbortSignal;
-        firstRequestSignal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
-      }))
-      .mockImplementationOnce(async (url: string) => ({
-        ok: true,
-        json: async () => pageResponse(Number(new URL(url, 'http://localhost').searchParams.get('page')), true),
+    let cancelled = false;
+    apiMock
+      .mockImplementationOnce(() => new Observable(() => () => { cancelled = true; }))
+      .mockImplementationOnce(({ params }: HttpRequest<unknown>) => ({
+        body: pageResponse(Number(params.get('page')), true),
       }));
 
     tracksService.setFilter('r');
     fixture.detectChanges();
-    expect(firstRequestSignal?.aborted).toBe(false);
+    expect(cancelled).toBe(false);
 
     tracksService.setFilter('ro');
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(firstRequestSignal?.aborted).toBe(true);
+    expect(cancelled).toBe(true);
     expect(lastRequestParams().get('filter')).toBe('ro');
   });
 
@@ -150,13 +141,13 @@ describe('Tracks', () => {
     expect(lastRequestParams().get('sort')).toBe('albumTitle,desc');
     expect(lastRequestParams().get('filter')).toBe('rock');
 
-    const requestCount = fetchMock.mock.calls.length;
+    const requestCount = apiMock.mock.calls.length;
     fixture.destroy();
     const recreated = TestBed.createComponent(Tracks);
     recreated.detectChanges();
     await recreated.whenStable();
 
-    expect(fetchMock).toHaveBeenCalledTimes(requestCount);
+    expect(apiMock).toHaveBeenCalledTimes(requestCount);
     expect(recreated.nativeElement.querySelector('.pager span').textContent).toContain('Page 3 of 4');
   });
 

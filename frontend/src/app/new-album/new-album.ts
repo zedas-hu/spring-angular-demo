@@ -1,6 +1,7 @@
 import { computed, Component, effect, ElementRef, viewChild, output, inject, signal, untracked } from '@angular/core';
 import { form, FormField, FormRoot, required, validate, type FieldTree, type TreeValidationResult } from '@angular/forms/signals';
-import { AlbumCreateError, AlbumService } from '../album/album.service';
+import { AlbumService } from '../album/album.service';
+import { ApiError, ApiService } from '../api.service';
 import { TranslationService, Translator } from '../i18n/translation.service';
 import { KeyProvider } from '../keyprovider';
 import { MessagesService } from '../messages';
@@ -20,6 +21,7 @@ interface NewAlbumModel {
 })
 export class NewAlbumComponent {
   private readonly albumService = inject(AlbumService);
+  private readonly api = inject(ApiService);
   private readonly translations = inject(TranslationService);
   private readonly messages = inject(MessagesService);
   private dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
@@ -36,8 +38,8 @@ export class NewAlbumComponent {
     const match = this.duplicateMatch();
     return match && match.title === this.albumModel().title.trim() ? match.albumId : null;
   });
-  readonly artistKeyProvider = new KeyProvider('artists');
-  private readonly albumKeyProvider = new KeyProvider('albums');
+  readonly artistKeyProvider = new KeyProvider(this.api, 'artists');
+  private readonly albumKeyProvider = new KeyProvider(this.api, 'albums');
 
   // readonly t = (code?: string) => this.translations.translate(code ?? '');
   readonly t: Translator = this.translations.translate.bind(this.translations);
@@ -101,7 +103,7 @@ export class NewAlbumComponent {
       this.created.emit(album.albumId);
       return undefined;
     } catch (error) {
-      if (!(error instanceof AlbumCreateError)) {
+      if (!(error instanceof ApiError)) {
         this.formError.set('ALBUM_CREATE_FAILED');
         return undefined;
       }

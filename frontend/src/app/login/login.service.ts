@@ -1,4 +1,5 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { ApiService } from '../api.service';
 
 export interface EmployeeLoginOption {
   employeeId: number;
@@ -20,6 +21,7 @@ export interface CurrentUser {
 
 @Injectable({ providedIn: 'root' })
 export class LoginService {
+  private readonly api = inject(ApiService);
   private readonly currentUserState = signal<CurrentUser | null>(null);
   private readonly sessionChecked = signal(false);
 
@@ -27,22 +29,17 @@ export class LoginService {
   readonly hasSession = computed(() => Boolean(this.currentUser()?.email));
   readonly isSessionChecked = this.sessionChecked.asReadonly();
 
-  async getEmployees(signal: AbortSignal): Promise<EmployeeLoginOption[]> {
-    const response = await fetch('/api/employees', { signal });
-    if (!response.ok) {
-      throw new Error('LOGIN_EMPLOYEES_FETCH_FAILED');
-    }
-
-    return response.json() as Promise<EmployeeLoginOption[]>;
+  getEmployees(signal: AbortSignal): Promise<EmployeeLoginOption[]> {
+    return this.api.request<EmployeeLoginOption[]>('GET', '/api/employees', {
+      signal,
+      fallbackError: 'LOGIN_EMPLOYEES_FETCH_FAILED',
+    });
   }
 
-  async getSession(): Promise<CurrentUser> {
-    const response = await fetch('/api/login/session');
-    if (!response.ok) {
-      throw new Error('LOGIN_SESSION_FETCH_FAILED');
-    }
-
-    return await response.json() as CurrentUser;
+  getSession(): Promise<CurrentUser> {
+    return this.api.request<CurrentUser>('GET', '/api/login/session', {
+      fallbackError: 'LOGIN_SESSION_FETCH_FAILED',
+    });
   }
 
   async loadSession(): Promise<void> {
@@ -54,16 +51,10 @@ export class LoginService {
   }
 
   async login(email: string): Promise<string> {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+    const session = await this.api.request<LoginSessionResponse>('POST', '/api/login', {
+      body: { email },
+      fallbackError: 'LOGIN_FAILED',
     });
-    if (!response.ok) {
-      throw new Error('LOGIN_FAILED');
-    }
-
-    const session = await response.json() as LoginSessionResponse;
     if (!session.email) {
       throw new Error('LOGIN_FAILED');
     }
@@ -79,11 +70,11 @@ export class LoginService {
   }
 
   async logout(): Promise<void> {
-    const response = await fetch('/api/login/session', { method: 'DELETE' });
-    if (!response.ok) {
-      throw new Error('LOGOUT_FAILED');
-    }
+    await this.api.request<void>('DELETE', '/api/login/session', {
+      fallbackError: 'LOGOUT_FAILED',
+    });
 
     this.currentUserState.set(null);
   }
 }
+

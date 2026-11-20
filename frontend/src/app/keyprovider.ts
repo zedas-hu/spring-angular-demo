@@ -1,3 +1,5 @@
+import { ApiService } from './api.service';
+
 export interface KeyRecord {
   key: number;
   value: string;
@@ -9,7 +11,10 @@ export class KeyProvider {
   private keyList: KeyRecord[] | undefined;
   private keyListRequest: Promise<KeyRecord[]> | undefined;
 
-  constructor(private readonly type: KeyProviderType) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly type: KeyProviderType,
+  ) {}
 
   getKeyList(): Promise<KeyRecord[]> {
     if (this.keyList !== undefined)
@@ -29,11 +34,9 @@ export class KeyProvider {
     return this.keyListRequest;
   }
 
-  private async loadKeyList(): Promise<KeyRecord[]> {
-    const response = await fetch(`/api/${this.type}/keys`);
-
-    if (!response.ok) throw new Error('KEY_FETCH_ERROR');
-
-    return response.json() as Promise<KeyRecord[]>;
+  private loadKeyList(): Promise<KeyRecord[]> {
+    return this.api.request<KeyRecord[]>('GET', `/api/${this.type}/keys`, {
+      fallbackError: 'KEY_FETCH_ERROR',
+    });
   }
 }

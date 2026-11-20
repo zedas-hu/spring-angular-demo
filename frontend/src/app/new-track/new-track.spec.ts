@@ -1,16 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { vi } from 'vitest';
+import { HttpRequest } from '@angular/common/http';
+import { Mock, vi } from 'vitest';
 import { NewTrack } from './new-track';
+import { ApiStubHandler, provideApiStub } from '../testing/api-stub';
 
 describe('NewTrack', () => {
   let fixture: ComponentFixture<NewTrack>;
-  let fetchMock: ReturnType<typeof vi.fn>;
+  let apiMock: Mock<ApiStubHandler>;
 
-  const jsonResponse = (status: number, body: unknown) => ({
-    ok: status < 400,
-    status,
-    json: async () => body,
-  });
   const setValue = (id: string, value: string) => {
     const input = fixture.nativeElement.querySelector(`#${id}`) as HTMLInputElement | HTMLSelectElement;
     input.value = value;
@@ -27,19 +24,19 @@ describe('NewTrack', () => {
   };
 
   beforeEach(async () => {
-    fetchMock = vi.fn(async (url: string) => {
+    apiMock = vi.fn<ApiStubHandler>(({ url }: HttpRequest<unknown>) => {
       if (url === '/api/genres') {
-        return jsonResponse(200, [{ genreId: 2, name: 'Rock' }]);
+        return { body: [{ genreId: 2, name: 'Rock' }] };
       }
       if (url === '/api/media-types') {
-        return jsonResponse(200, [{ mediaTypeId: 1, name: 'MPEG audio file' }]);
+        return { body: [{ mediaTypeId: 1, name: 'MPEG audio file' }] };
       }
-      return jsonResponse(201, {});
+      return { status: 201, body: {} };
     });
-    vi.stubGlobal('fetch', fetchMock);
 
     await TestBed.configureTestingModule({
       imports: [NewTrack],
+      providers: [provideApiStub(apiMock)],
     }).compileComponents();
 
     fixture = TestBed.createComponent(NewTrack);
@@ -47,10 +44,6 @@ describe('NewTrack', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   it('should create', () => {
@@ -77,9 +70,10 @@ describe('NewTrack', () => {
     expect(fixture.componentInstance.trackForm().invalid()).toBe(false);
     await submit();
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/tracks', expect.objectContaining({
+    expect(apiMock).toHaveBeenCalledWith(expect.objectContaining({
       method: 'POST',
-      body: JSON.stringify({
+      url: '/api/tracks',
+      body: {
         name: 'New track',
         albumId: 7,
         genreId: 2,
@@ -87,7 +81,7 @@ describe('NewTrack', () => {
         composer: 'Composer',
         milliseconds: 225000,
         unitPrice: 0.99,
-      }),
+      },
     }));
     expect(created).toHaveBeenCalledOnce();
   });
@@ -101,22 +95,25 @@ describe('NewTrack', () => {
     fixture.detectChanges();
     await submit();
 
-    expect(fetchMock).not.toHaveBeenCalledWith('/api/tracks', expect.anything());
+    expect(apiMock).not.toHaveBeenCalledWith(expect.objectContaining({ method: 'POST', url: '/api/tracks' }));
     expect(fixture.nativeElement.textContent).toContain('Enter the duration as minutes:seconds (for example, 3:45).');
   });
 
   it('shows the server error when the album already contains a track with that name', async () => {
-    fetchMock.mockImplementation(async (url: string) => {
+    apiMock.mockImplementation(({ url }: HttpRequest<unknown>) => {
       if (url === '/api/genres') {
-        return jsonResponse(200, [{ genreId: 2, name: 'Rock' }]);
+        return { body: [{ genreId: 2, name: 'Rock' }] };
       }
       if (url === '/api/media-types') {
-        return jsonResponse(200, [{ mediaTypeId: 1, name: 'MPEG audio file' }]);
+        return { body: [{ mediaTypeId: 1, name: 'MPEG audio file' }] };
       }
-      return jsonResponse(409, {
-        detail: 'TRACK_NAME_DUPLICATION',
-        fieldErrors: { name: 'TRACK_NAME_DUPLICATION' },
-      });
+      return {
+        status: 409,
+        body: {
+          detail: 'TRACK_NAME_DUPLICATION',
+          fieldErrors: { name: 'TRACK_NAME_DUPLICATION' },
+        },
+      };
     });
 
     setValue('track-name', 'Duplicate');
@@ -136,9 +133,10 @@ describe('NewTrack', () => {
     setValue('track-unit-price', '99999999.99');
     await submit();
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/tracks', expect.objectContaining({
+    expect(apiMock).toHaveBeenCalledWith(expect.objectContaining({
       method: 'POST',
-      body: expect.stringContaining('"unitPrice":99999999.99'),
+      url: '/api/tracks',
+      body: expect.objectContaining({ unitPrice: 99999999.99 }),
     }));
   });
 
@@ -152,22 +150,25 @@ describe('NewTrack', () => {
     fixture.detectChanges();
     await submit();
 
-    expect(fetchMock).not.toHaveBeenCalledWith('/api/tracks', expect.anything());
+    expect(apiMock).not.toHaveBeenCalledWith(expect.objectContaining({ method: 'POST', url: '/api/tracks' }));
     expect(fixture.nativeElement.textContent).toContain('Enter a non-negative price with at most 8 whole digits and 2 decimal places.');
   });
 
   it('shows the server unit price error next to the price field', async () => {
-    fetchMock.mockImplementation(async (url: string) => {
+    apiMock.mockImplementation(({ url }: HttpRequest<unknown>) => {
       if (url === '/api/genres') {
-        return jsonResponse(200, [{ genreId: 2, name: 'Rock' }]);
+        return { body: [{ genreId: 2, name: 'Rock' }] };
       }
       if (url === '/api/media-types') {
-        return jsonResponse(200, [{ mediaTypeId: 1, name: 'MPEG audio file' }]);
+        return { body: [{ mediaTypeId: 1, name: 'MPEG audio file' }] };
       }
-      return jsonResponse(400, {
-        detail: 'Validation failed',
-        fieldErrors: { unitPrice: 'UNIT_PRICE_INVALID' },
-      });
+      return {
+        status: 400,
+        body: {
+          detail: 'Validation failed',
+          fieldErrors: { unitPrice: 'UNIT_PRICE_INVALID' },
+        },
+      };
     });
 
     setValue('track-name', 'New track');
@@ -211,9 +212,10 @@ describe('NewTrack', () => {
     setValue('track-name', 'Updated name');
     await submit();
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/tracks/42', expect.objectContaining({
+    expect(apiMock).toHaveBeenCalledWith(expect.objectContaining({
       method: 'PUT',
-      body: JSON.stringify({
+      url: '/api/tracks/42',
+      body: {
         name: 'Updated name',
         albumId: 7,
         genreId: 2,
@@ -221,7 +223,7 @@ describe('NewTrack', () => {
         composer: 'Composer',
         milliseconds: 225500,
         unitPrice: 0.99,
-      }),
+      },
     }));
     expect(updated).toHaveBeenCalledOnce();
   });

@@ -1,4 +1,5 @@
-import { Injectable, linkedSignal, resource, signal } from '@angular/core';
+import { inject, Injectable, linkedSignal, resource, signal } from '@angular/core';
+import { ApiService } from '../api.service';
 import { TrackRecord } from '../tracks/tracks.service';
 
 export interface AlbumRecord {
@@ -19,35 +20,16 @@ export interface AlbumCreateRequest {
     artistId: number | null;
 }
 
-export class AlbumCreateError extends Error {
-    constructor(
-        readonly detail: string,
-        readonly fieldErrors: Record<string, string>,
-    ) {
-        super(detail);
-    }
-}
-
 @Injectable({ providedIn: 'root' })
 export class AlbumService {
+  private readonly api = inject(ApiService);
   private readonly currentAlbum = signal<number | null>(null);
 
-  async createAlbum(request: AlbumCreateRequest): Promise<AlbumRecord> {
-    const response = await fetch('/api/albums', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
+  createAlbum(request: AlbumCreateRequest): Promise<AlbumRecord> {
+    return this.api.request<AlbumRecord>('POST', '/api/albums', {
+      body: request,
+      fallbackError: 'ALBUM_CREATE_FAILED',
     });
-
-    if (!response.ok) {
-      const problem = await response.json().catch(() => ({})) as {
-        detail?: string;
-        fieldErrors?: Record<string, string>;
-      };
-      throw new AlbumCreateError(problem.detail ?? 'ALBUM_CREATE_FAILED', problem.fieldErrors ?? {});
-    }
-
-    return response.json();
   }
   
   readonly pageData = resource<AlbumRecord, FetchParams>({
@@ -60,12 +42,10 @@ export class AlbumService {
         throw new Error('ALBUM_ID_REQUIRED');
       }
 
-      const response = await fetch(`/api/albums/${params.albumId}`, { signal: abortSignal });
-
-      if (!response.ok)
-        throw new Error('TRACKS_FETCH_ERROR');
-
-      return response.json();
+      return this.api.request<AlbumRecord>('GET', `/api/albums/${params.albumId}`, {
+        signal: abortSignal,
+        fallbackError: 'TRACKS_FETCH_ERROR',
+      });
     },
   });
 
@@ -83,12 +63,9 @@ export class AlbumService {
     this.currentAlbum.set(albumId);
   }
 
-  async deleteAlbum(albumId: number): Promise<void> {
-    const response = await fetch(`/api/albums/${albumId}`, { method: 'DELETE' });
-
-    if (!response.ok) {
-      const problem = await response.json().catch(() => ({})) as { detail?: string };
-      throw new Error(problem.detail ?? 'ALBUM_DELETE_FAILED');
-    }
+  deleteAlbum(albumId: number): Promise<void> {
+    return this.api.request<void>('DELETE', `/api/albums/${albumId}`, {
+      fallbackError: 'ALBUM_DELETE_FAILED',
+    });
   }
 }

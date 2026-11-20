@@ -1,19 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { vi } from 'vitest';
+import { HttpRequest } from '@angular/common/http';
+import { Mock, vi } from 'vitest';
+import { ApiStubHandler, provideApiStub } from '../testing/api-stub';
 import { LoginComponent } from './login';
 import { LoginService } from './login.service';
 
 describe('LoginComponent', () => {
   let fixture: ComponentFixture<LoginComponent>;
   let component: LoginComponent;
-  let fetchMock: ReturnType<typeof vi.fn>;
+  let apiMock: Mock<ApiStubHandler>;
 
   beforeEach(async () => {
-    fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
+    apiMock = vi.fn<ApiStubHandler>(async ({ url, method }: HttpRequest<unknown>) => {
       if (url === '/api/employees') {
         return {
-          ok: true,
-          json: async () => [{
+          body: [{
             employeeId: 7,
             firstName: 'Jane',
             lastName: 'Doe',
@@ -22,19 +23,16 @@ describe('LoginComponent', () => {
         };
       }
 
-      if (url === '/api/login' && options?.method === 'POST') {
-        return {
-          ok: true,
-          json: async () => ({ email: 'jane@example.com' }),
-        };
+      if (url === '/api/login' && method === 'POST') {
+        return { body: { email: 'jane@example.com' } };
       }
 
       throw new Error(`Unexpected request: ${url}`);
     });
-    vi.stubGlobal('fetch', fetchMock);
 
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
+      providers: [provideApiStub(apiMock)],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginComponent);
@@ -42,10 +40,6 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   it('shows a demo-login warning above the employee selector', () => {
@@ -78,11 +72,11 @@ describe('LoginComponent', () => {
     await component.login(new Event('submit', { cancelable: true }));
 
     expect(TestBed.inject(LoginService).hasSession()).toBe(true);
-    expect(fetchMock).toHaveBeenLastCalledWith('/api/login', {
+    expect(apiMock).toHaveBeenLastCalledWith(expect.objectContaining({
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'jane@example.com' }),
-    });
+      url: '/api/login',
+      body: { email: 'jane@example.com' },
+    }));
     expect(closed).toBe(true);
   });
 });

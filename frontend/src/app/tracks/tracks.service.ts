@@ -1,6 +1,5 @@
-// import { HttpClient } from '@angular/common/http';
-import { Injectable, linkedSignal, resource, signal } from '@angular/core';
-// import { rxResource } from '@angular/core/rxjs-interop';
+import { inject, Injectable, linkedSignal, resource, signal } from '@angular/core';
+import { ApiService } from '../api.service';
 
 export interface TrackRecord {
   trackId: number;
@@ -27,15 +26,6 @@ export interface TrackCreateRequest {
   unitPrice: number;
 }
 
-export class TrackSaveError extends Error {
-  constructor(
-    readonly detail: string,
-    readonly fieldErrors: Record<string, string>,
-  ) {
-    super(detail);
-  }
-}
-
 export interface PageResponse<T> {
   content: T[];
   empty: boolean;
@@ -54,74 +44,45 @@ export type SortDirection = 'asc' | 'desc';
 export class TracksService {
   static readonly pageSize = 10;
 
-  // private readonly http = inject(HttpClient);
+  private readonly api = inject(ApiService);
   private readonly currentPage = signal(0);
   private readonly sort = signal<SortType>('name');
   private readonly filter = signal<string | undefined>(undefined);
   private readonly direction = signal<SortDirection>('asc');
 
-  async createTrack(request: TrackCreateRequest): Promise<TrackRecord> {
-    return this.saveTrack('/api/tracks', 'POST', request, 'TRACK_CREATE_FAILED');
-  }
-
-  async updateTrack(trackId: number, request: TrackCreateRequest): Promise<TrackRecord> {
-    return this.saveTrack(`/api/tracks/${trackId}`, 'PUT', request, 'TRACK_UPDATE_FAILED');
-  }
-
-  async deleteTrack(trackId: number): Promise<void> {
-    const response = await fetch(`/api/tracks/${trackId}`, { method: 'DELETE' });
-    if (!response.ok) {
-      const problem = await response.json().catch(() => ({})) as { detail?: string };
-      throw new Error(problem.detail ?? 'TRACK_DELETE_FAILED');
-    }
-  }
-
-  private async saveTrack(
-    url: string,
-    method: 'POST' | 'PUT',
-    request: TrackCreateRequest,
-    fallbackError: string,
-  ): Promise<TrackRecord> {
-    const response = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
+  createTrack(request: TrackCreateRequest): Promise<TrackRecord> {
+    return this.api.request<TrackRecord>('POST', '/api/tracks', {
+      body: request,
+      fallbackError: 'TRACK_CREATE_FAILED',
     });
-    if (!response.ok) {
-      const problem = await response.json().catch(() => ({})) as {
-        detail?: string;
-        fieldErrors?: Record<string, string>;
-      };
-      throw new TrackSaveError(problem.detail ?? fallbackError, problem.fieldErrors ?? {});
-    }
-
-    return response.json();
   }
 
-  // public readonly pageData = rxResource<PageResponse<TrackRecord>, ResourceParams>({
-  //   params: () => ({
-  //     page: this.currentPage(),
-  //     size: TracksService.pageSize,
-  //     sort: `${this.sort()},${this.direction()}`,
-  //   }),
-  //   stream: ({ params }) => this.http.get<PageResponse<TrackRecord>>('/api/tracks', {
-  //     params,
-  //   }),
-  // });
-  readonly pageData = resource<PageResponse<TrackRecord>, URLSearchParams>({
-    params: () => new URLSearchParams({
+  updateTrack(trackId: number, request: TrackCreateRequest): Promise<TrackRecord> {
+    return this.api.request<TrackRecord>('PUT', `/api/tracks/${trackId}`, {
+      body: request,
+      fallbackError: 'TRACK_UPDATE_FAILED',
+    });
+  }
+
+  deleteTrack(trackId: number): Promise<void> {
+    return this.api.request<void>('DELETE', `/api/tracks/${trackId}`, {
+      fallbackError: 'TRACK_DELETE_FAILED',
+    });
+  }
+
+  readonly pageData = resource<PageResponse<TrackRecord>, Record<string, string>>({
+    params: () => ({
       page: String(this.currentPage()),
       size: String(TracksService.pageSize),
       sort: `${this.sort()},${this.direction()}`,
       filter: this.filter() ?? '',
     }),
     loader: async ({ params, abortSignal }) => {
-      const response = await fetch(`/api/tracks?${params}`, { signal: abortSignal });
-
-      if (!response.ok)
-        throw new Error('TRACKS_FETCH_ERROR');
-
-      const page: PageResponse<TrackRecord> = await response.json();
+      const page = await this.api.request<PageResponse<TrackRecord>>('GET', '/api/tracks', {
+        params,
+        signal: abortSignal,
+        fallbackError: 'TRACKS_FETCH_ERROR',
+      });
       if (page.number > 0 && page.number >= page.totalPages) {
         this.currentPage.set(Math.max(0, page.totalPages - 1));
       }

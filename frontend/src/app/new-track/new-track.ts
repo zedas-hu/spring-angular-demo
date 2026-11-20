@@ -1,6 +1,7 @@
 import { Component, effect, ElementRef, inject, input, output, resource, signal, untracked, viewChild } from '@angular/core';
 import { form, FormField, FormRoot, required, validate, type FieldTree, type TreeValidationResult } from '@angular/forms/signals';
-import { TrackRecord, TrackSaveError, TracksService } from '../tracks/tracks.service';
+import { ApiError, ApiService } from '../api.service';
+import { TrackRecord, TracksService } from '../tracks/tracks.service';
 import { TranslationService, Translator } from '../i18n/translation.service';
 import { MessagesService } from '../messages';
 import { formatDuration } from '../tools';
@@ -36,6 +37,7 @@ interface NewTrackModel {
 })
 export class NewTrack {
   private readonly tracksService = inject(TracksService);
+  private readonly api = inject(ApiService);
   private readonly translations = inject(TranslationService);
   private readonly messages = inject(MessagesService);
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
@@ -59,22 +61,18 @@ export class NewTrack {
   readonly options = resource<TrackOptions, boolean>({
     params: () => true,
     loader: async ({ abortSignal }) => {
-      const [genresResponse, mediaTypesResponse] = await Promise.all([
-        fetch('/api/genres', { signal: abortSignal }),
-        fetch('/api/media-types', { signal: abortSignal }),
+      const [genres, mediaTypes] = await Promise.all([
+        this.api.request<GenreOption[]>('GET', '/api/genres', {
+          signal: abortSignal,
+          fallbackError: 'GENRES_FETCH_ERROR',
+        }),
+        this.api.request<MediaTypeOption[]>('GET', '/api/media-types', {
+          signal: abortSignal,
+          fallbackError: 'MEDIA_TYPES_FETCH_ERROR',
+        }),
       ]);
 
-      if (!genresResponse.ok) {
-        throw new Error('GENRES_FETCH_ERROR');
-      }
-      if (!mediaTypesResponse.ok) {
-        throw new Error('MEDIA_TYPES_FETCH_ERROR');
-      }
-
-      return {
-        genres: await genresResponse.json() as GenreOption[],
-        mediaTypes: await mediaTypesResponse.json() as MediaTypeOption[],
-      };
+      return { genres, mediaTypes };
     },
   });
 
@@ -190,7 +188,7 @@ export class NewTrack {
       }
       return undefined;
     } catch (error) {
-      if (!(error instanceof TrackSaveError)) {
+      if (!(error instanceof ApiError)) {
         if (!(error instanceof Error)) {
           throw error;
         }

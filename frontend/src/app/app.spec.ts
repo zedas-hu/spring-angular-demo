@@ -1,26 +1,20 @@
 import { TestBed } from '@angular/core/testing';
-import { vi } from 'vitest';
+import { Mock, vi } from 'vitest';
 import { App } from './app';
 import { LoginService } from './login/login.service';
+import { ApiStubHandler, provideApiStub } from './testing/api-stub';
 
 describe('App', () => {
-  let fetchMock: ReturnType<typeof vi.fn>;
+  let apiMock: Mock<ApiStubHandler>;
 
   beforeEach(async () => {
-    fetchMock = vi.fn(async () => ({
-      ok: true,
-      json: async () => ({ email: null }),
-    }));
-    vi.stubGlobal('fetch', fetchMock);
+    apiMock = vi.fn<ApiStubHandler>(() => ({ body: { email: null } }));
 
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [provideApiStub(apiMock)],
     })
       .compileComponents();
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   it('should create the app', async () => {
@@ -38,10 +32,7 @@ describe('App', () => {
   });
 
   it('hides the login button when a session already exists', async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({ email: 'jane@example.com' }),
-    });
+    apiMock.mockReturnValue({ body: { email: 'jane@example.com' } });
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -57,10 +48,7 @@ describe('App', () => {
       lastName: 'Doe',
       email: 'jane@example.com',
     };
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => currentUser,
-    });
+    apiMock.mockReturnValue({ body: currentUser });
 
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
@@ -73,10 +61,7 @@ describe('App', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ email: 'jane@example.com' }),
-    });
+    apiMock.mockReturnValueOnce({ body: { email: 'jane@example.com' } });
     await TestBed.inject(LoginService).login('jane@example.com');
     fixture.detectChanges();
     expect(fixture.componentInstance.hasSession()).toBe(true);
@@ -84,7 +69,7 @@ describe('App', () => {
     await fixture.componentInstance.logout();
     fixture.detectChanges();
 
-    expect(fetchMock).toHaveBeenLastCalledWith('/api/login/session', { method: 'DELETE' });
+    expect(apiMock).toHaveBeenLastCalledWith(expect.objectContaining({ method: 'DELETE', url: '/api/login/session' }));
     expect(fixture.componentInstance.hasSession()).toBe(false);
     expect(fixture.nativeElement.querySelector('.login a')?.textContent).toContain('Login');
   });

@@ -1,33 +1,34 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { TrackCreateRequest, TracksService } from './tracks.service';
+import { PageResponse, TrackCreateRequest, TracksService } from './tracks.service';
+
+const emptyPage: PageResponse<never> = {
+  content: [],
+  empty: true,
+  first: true,
+  last: true,
+  number: 0,
+  numberOfElements: 0,
+  totalElements: 0,
+  totalPages: 0,
+};
 
 describe('TracksService', () => {
   let service: TracksService;
-  let fetchMock: ReturnType<typeof vi.fn>;
+  let http: HttpTestingController;
+
+  const trackPagesUrl = (req: { url: string }) => req.url === '/api/tracks';
 
   beforeEach(() => {
-    fetchMock = vi.fn(async () => ({
-      ok: true,
-      json: async () => ({
-        content: [],
-        empty: true,
-        first: true,
-        last: true,
-        number: 0,
-        numberOfElements: 0,
-        totalElements: 0,
-        totalPages: 0,
-      }),
-    }));
-    vi.stubGlobal('fetch', fetchMock);
-
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
     service = TestBed.inject(TracksService);
+    http = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    http.verify();
   });
 
   it('should be created', () => {
@@ -52,79 +53,84 @@ describe('TracksService', () => {
       unitPrice: 0.99,
     };
 
-    await service.updateTrack(42, request);
+    const result = service.updateTrack(42, request);
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/tracks/42', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
-    });
+    const req = http.expectOne({ method: 'PUT', url: '/api/tracks/42' });
+    expect(req.request.body).toEqual(request);
+    req.flush({ trackId: 42, ...request });
+
+    await expect(result).resolves.toMatchObject({ trackId: 42 });
   });
 
   it('deletes a track with a DELETE request', async () => {
-    await service.deleteTrack(42);
+    const result = service.deleteTrack(42);
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/tracks/42', { method: 'DELETE' });
+    http.expectOne({ method: 'DELETE', url: '/api/tracks/42' }).flush(null, { status: 204, statusText: 'No Content' });
+
+    await expect(result).resolves.toBeNull();
   });
 
   it('refetches the current track page when refreshed', async () => {
     TestBed.tick();
+    const initial = http.expectOne(trackPagesUrl);
+    initial.flush(emptyPage);
     await vi.waitFor(() => expect(service.pageData.hasValue()).toBe(true));
-    expect(fetchMock).toHaveBeenCalledTimes(1);
 
     service.refreshPage();
     TestBed.tick();
 
-    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
-    expect(fetchMock.mock.calls[1][0]).toBe(fetchMock.mock.calls[0][0]);
+    const reloaded = http.expectOne(trackPagesUrl);
+    expect(reloaded.request.urlWithParams).toBe(initial.request.urlWithParams);
+    reloaded.flush(emptyPage);
   });
 
   it('moves to the last existing page when the current page is empty', async () => {
-    fetchMock.mockImplementation(async (url: string) => {
-      const page = Number(new URL(url, 'http://localhost').searchParams.get('page'));
-      return {
-        ok: true,
-        json: async () => ({
-          content: page < 2 ? [{ trackId: page }] : [],
-          empty: page >= 2,
-          first: page === 0,
-          last: page === 1,
-          number: page,
-          numberOfElements: page < 2 ? 1 : 0,
-          totalElements: 2,
-          totalPages: 2,
-        }),
-      };
-    });
-
     service.setCurrentPage(2);
     TestBed.tick();
 
+    http.expectOne((req) => trackPagesUrl(req) && req.params.get('page') === '2').flush({
+      content: [],
+      empty: true,
+      first: false,
+      last: true,
+      number: 2,
+      numberOfElements: 0,
+      totalElements: 2,
+      totalPages: 2,
+    });
+
     await vi.waitFor(() => expect(service.getCurrentPage()).toBe(1));
+
+    TestBed.tick();
+    http.expectOne((req) => trackPagesUrl(req) && req.params.get('page') === '1').flush({
+      content: [{ trackId: 1 }],
+      empty: false,
+      first: false,
+      last: true,
+      number: 1,
+      numberOfElements: 1,
+      totalElements: 2,
+      totalPages: 2,
+    });
   });
 
   it('keeps the last loaded page when a later refresh fails', async () => {
-    fetchMock
-      .mockImplementationOnce(async () => ({
-        ok: true,
-        json: async () => ({
-          content: [{ trackId: 1 }],
-          empty: false,
-          first: true,
-          last: true,
-          number: 0,
-          numberOfElements: 1,
-          totalElements: 1,
-          totalPages: 1,
-        }),
-      }))
-      .mockImplementationOnce(async () => ({ ok: false, json: async () => ({}) }));
-
     TestBed.tick();
+    http.expectOne(trackPagesUrl).flush({
+      content: [{ trackId: 1 }],
+      empty: false,
+      first: true,
+      last: true,
+      number: 0,
+      numberOfElements: 1,
+      totalElements: 1,
+      totalPages: 1,
+    });
     await vi.waitFor(() => expect(service.displayedPage()?.content).toHaveLength(1));
 
     service.refreshPage();
     TestBed.tick();
+    http.expectOne(trackPagesUrl).flush({}, { status: 500, statusText: 'Server Error' });
     await vi.waitFor(() => expect(service.pageData.error()).toBeTruthy());
 
     expect(service.displayedPage()?.content[0].trackId).toBe(1);
