@@ -35,14 +35,14 @@ export class Album {
     const albumId = Number(value);
     return Number.isInteger(albumId) && albumId > 0 ? albumId : null;
   });
-  readonly pageResource = this.albumService.pageData;
+  private readonly albumPage = this.albumService.createAlbumPage(this.selectedAlbumId);
+  readonly pageResource = this.albumPage.pageData;
+  readonly displayedPage = this.albumPage.displayedPage;
   readonly sessionLoaded = this.loginService.hasSession;
   readonly convertToMinutes = formatDuration;
   readonly t: Translator = this.translations.translate.bind(this.translations);
 
   constructor() {
-    this.syncAlbum();
-    effect(() => this.syncAlbum());
     effect(() => {
       const routeAlbumId = this.routeParams().get('albumId');
       if (routeAlbumId === null || this.selectedAlbumId() === null) {
@@ -94,7 +94,7 @@ export class Album {
   }
 
   editTrack(trackId: number): void {
-    const track = this.albumService.displayedPage()?.tracks.find(
+    const track = this.displayedPage()?.tracks.find(
       candidate => candidate.trackId === trackId,
     );
     if (!track) {
@@ -131,10 +131,6 @@ export class Album {
     }
 
     this.trackDialogRef.instance.open();
-  }
-
-  private syncAlbum(): void {
-    this.albumService.setCurrentAlbum(this.selectedAlbumId());
   }
 
   private reloadAlbumAndTracks(): void {

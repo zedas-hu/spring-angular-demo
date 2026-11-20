@@ -1,4 +1,4 @@
-import { Component, effect, ElementRef, inject, input, output, resource, signal, untracked, viewChild } from '@angular/core';
+import { Component, effect, ElementRef, inject, input, linkedSignal, output, resource, signal, untracked, viewChild } from '@angular/core';
 import { form, FormField, FormRoot, required, validate, type FieldTree, type TreeValidationResult } from '@angular/forms/signals';
 import { ApiError, ApiService } from '../api.service';
 import { TrackRecord, TracksService } from '../tracks/tracks.service';
@@ -49,13 +49,23 @@ export class NewTrack {
   readonly updated = output<void>();
   readonly formError = signal<string | null>(null);
   readonly t: Translator = this.translations.translate.bind(this.translations);
-  private readonly trackModel = signal<NewTrackModel>({
-    name: '',
-    genreId: '',
-    mediaTypeId: '',
-    composer: '',
-    duration: '',
-    unitPrice: 0.99,
+  private readonly trackModel = linkedSignal<NewTrackModel>(() => {
+    const track = this.track();
+    return track ? {
+      name: track.name,
+      genreId: track.genreId === null ? '' : String(track.genreId),
+      mediaTypeId: track.mediaTypeId === null ? '' : String(track.mediaTypeId),
+      composer: track.composer ?? '',
+      duration: formatDuration(track.milliseconds),
+      unitPrice: track.unitPrice ?? 0.99,
+    } : {
+      name: '',
+      genreId: '',
+      mediaTypeId: '',
+      composer: '',
+      duration: '',
+      unitPrice: 0.99,
+    };
   });
 
   readonly options = resource<TrackOptions, boolean>({
@@ -120,24 +130,6 @@ export class NewTrack {
   );
 
   constructor() {
-    effect(() => {
-      const track = this.track();
-      this.trackModel.set(track ? {
-        name: track.name,
-        genreId: track.genreId === null ? '' : String(track.genreId),
-        mediaTypeId: track.mediaTypeId === null ? '' : String(track.mediaTypeId),
-        composer: track.composer ?? '',
-        duration: formatDuration(track.milliseconds),
-        unitPrice: track.unitPrice ?? 0.99,
-      } : {
-        name: '',
-        genreId: '',
-        mediaTypeId: '',
-        composer: '',
-        duration: '',
-        unitPrice: 0.99,
-      });
-    });
     effect(() => {
       const error = this.options.error();
       if (error) {

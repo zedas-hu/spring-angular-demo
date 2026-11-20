@@ -1,5 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { AlbumService } from '../album/album.service';
@@ -47,16 +48,17 @@ describe('Album', () => {
   });
 
   it('does not show the previous album when loading another album fails', async () => {
-    service.setCurrentAlbum(1);
+    const albumId = signal<number | null>(1);
+    const { pageData, displayedPage } = TestBed.runInInjectionContext(() => service.createAlbumPage(albumId));
     TestBed.tick();
     http.expectOne('/api/albums/1').flush({ albumId: 1, title: 'First', artistId: 1, artistName: 'Artist', tracks: [] });
-    await vi.waitFor(() => expect(service.displayedPage()?.albumId).toBe(1));
+    await vi.waitFor(() => expect(displayedPage()?.albumId).toBe(1));
 
-    service.setCurrentAlbum(2);
+    albumId.set(2);
     TestBed.tick();
     http.expectOne('/api/albums/2').flush({}, { status: 500, statusText: 'Server Error' });
-    await vi.waitFor(() => expect(service.pageData.error()).toBeTruthy());
+    await vi.waitFor(() => expect(pageData.error()).toBeTruthy());
 
-    expect(service.displayedPage()).toBeUndefined();
+    expect(displayedPage()).toBeUndefined();
   });
 });
