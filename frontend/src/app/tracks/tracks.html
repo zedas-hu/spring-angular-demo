@@ -57,10 +57,8 @@
             </thead>
             <tbody>
             @if (pageResource.error()) {
-                <tr class="load-error"><td colspan="5">{{ t('LOAD_TRACKS_FAILED') }} <button class="text-button" (click)="tracksService.refreshPage()">{{ t('RETRY') }}</button></td></tr>
             }
             @if (!tracksService.displayedPage() && pageResource.isLoading()) {
-                <tr><td colspan="5">{{ t('LOADING_TRACKS') }}</td></tr>
             }
             @else if (tracksService.displayedPage(); as page) {
                 @if (page.content.length === 0) {
@@ -86,9 +84,11 @@
     @if (tracksService.displayedPage(); as page) {
         <button class="mover" (click)="firstPage()" [disabled]="isFirstPage(page)">❮❮</button>
         <button class="mover" (click)="previousPage()" [disabled]="isFirstPage(page)">❮</button>
+        <span>
         @if (page.page.totalPages > 0) {
-            <span>{{ t('PAGE_OF', page.page.number + 1, page.page.totalPages) }}</span>
+            {{ t('PAGE_OF', page.page.number + 1, page.page.totalPages) }}
         }
+        </span>
         <button class="mover" (click)="nextPage()" [disabled]="isLastPage(page)">❯</button>
         <button class="mover" (click)="lastPage()" [disabled]="isLastPage(page)">❯❯</button>
     }

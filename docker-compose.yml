@@ -1,0 +1,23 @@
+name: spring-angular-demo
+
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DB_URL: jdbc:sqlite:/data/chinook.db
+    volumes:
+      - ./database/data:/data
+    expose:
+      - "8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
