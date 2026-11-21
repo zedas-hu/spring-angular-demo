@@ -83,16 +83,19 @@ The application is available at [http://localhost:8080](http://localhost:8080). 
 
 ## Tests
 
-Run the frontend tests with:
+Run the frontend and backend test suites from the repository root with:
 
 ```bash
-npm test --workspace frontend
+npm test
 ```
 
-Run the backend tests with `DB_URL` set as shown above:
+The suites can also be run individually with `npm run frontend:test`,
+`npm run backend:test`.
+
+Run the Bruno REST API tests separately:
 
 ```bash
-mvn -f backend/pom.xml test
+npm run bruno:test
 ```
 
 ## Main technologies

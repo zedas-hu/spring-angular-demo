@@ -1,0 +1,17 @@
+meta {
+  name: Delete album
+  type: http
+  seq: 23
+}
+
+delete {
+  url: {{baseUrl}}/api/albums/{{testAlbumId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("deletes the created album after its track is removed", function() {
+    expect(res.status).to.equal(204);
+  });
+}

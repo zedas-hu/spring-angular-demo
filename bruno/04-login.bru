@@ -1,0 +1,24 @@
+meta {
+  name: Sign in
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "andrew@chinookcorp.com"
+  }
+}
+
+tests {
+  test("creates a session for a listed employee", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.email).to.equal("andrew@chinookcorp.com");
+  });
+}

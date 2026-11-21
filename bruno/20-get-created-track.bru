@@ -1,0 +1,19 @@
+meta {
+  name: Get created track
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{baseUrl}}/api/tracks/{{testTrackId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns the track created by this collection run", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.trackId).to.equal(bru.getVar("testTrackId"));
+    expect(res.body.name).to.equal(bru.getVar("testTrackName"));
+  });
+}

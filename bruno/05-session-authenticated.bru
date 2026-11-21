@@ -1,0 +1,19 @@
+meta {
+  name: Get authenticated session
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/login/session
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns the signed-in employee", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.email).to.equal("andrew@chinookcorp.com");
+    expect(res.body.employeeId).to.be.a("number");
+  });
+}

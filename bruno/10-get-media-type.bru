@@ -1,0 +1,19 @@
+meta {
+  name: Get media type by id
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/media-types/1
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns the requested media type", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.mediaTypeId).to.equal(1);
+    expect(res.body.name).to.be.a("string");
+  });
+}

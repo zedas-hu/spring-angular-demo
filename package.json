@@ -9,6 +9,10 @@
     "build": "npm run build --workspace frontend && mvn -f backend/pom.xml package -DskipTests",
     "dev": "npm run backend:compile && concurrently --kill-others --names backend,frontend \"npm:backend:start\" \"npm:frontend:start\"",
     "dev:recovery": "mvn -f backend/pom.xml -Pmapper-recovery clean compile && concurrently --kill-others --names backend,frontend \"mvn -f backend/pom.xml -Pmapper-recovery spring-boot:run\" \"npm:frontend:start\"",
+    "frontend:test": "npm test --workspace frontend",
+    "backend:test": "mvn -f backend/pom.xml test",
+    "bruno:test": "npm run backend:start & wait-on http://localhost:8080/api/tracks && cd bruno && bru run --env Local --tests-only",
+    "test": "npm run frontend:test && npm run backend:test",
     "backend:compile": "mvn -f backend/pom.xml compile",
     "backend:start": "mvn -f backend/pom.xml spring-boot:run",
     "frontend:start": "npm run start --workspace frontend -- --proxy-config proxy.conf.json",
@@ -16,6 +20,7 @@
     "docker:down": "docker-compose down"
   },
   "devDependencies": {
-    "concurrently": "^10.0.7"
+    "concurrently": "^10.0.7",
+    "wait-on": "^9.5.1"
   }
 }

@@ -1,0 +1,21 @@
+meta {
+  name: List genres
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/genres
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns genres", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body).to.be.an("array");
+    expect(res.body.length).to.be.greaterThan(0);
+    expect(res.body[0]).to.have.property("genreId");
+    expect(res.body[0]).to.have.property("name");
+  });
+}

@@ -1,0 +1,42 @@
+meta {
+  name: Create track
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{baseUrl}}/api/tracks
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "{{testTrackName}}",
+    "albumId": {{testAlbumId}},
+    "genreId": 1,
+    "mediaTypeId": 1,
+    "composer": "Bruno API test",
+    "milliseconds": 180000,
+    "unitPrice": 0.99
+  }
+}
+
+script:pre-request {
+  bru.setVar("testTrackName", "Bruno API track " + Date.now());
+}
+
+script:post-response {
+  bru.setVar("testTrackId", res.body.trackId);
+}
+
+tests {
+  test("creates a track under the new album", function() {
+    expect(res.status).to.equal(201);
+    expect(res.body.trackId).to.be.a("number");
+    expect(res.body.name).to.equal(bru.getVar("testTrackName"));
+    expect(res.body.albumId).to.equal(bru.getVar("testAlbumId"));
+    expect(res.body.genreId).to.equal(1);
+    expect(res.body.mediaTypeId).to.equal(1);
+  });
+}

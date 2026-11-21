@@ -1,0 +1,36 @@
+meta {
+  name: Create album
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{baseUrl}}/api/albums
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "{{testAlbumTitle}}",
+    "artistName": "AC/DC",
+    "artistId": 1
+  }
+}
+
+script:pre-request {
+  bru.setVar("testAlbumTitle", "Bruno API album " + Date.now());
+}
+
+script:post-response {
+  bru.setVar("testAlbumId", res.body.albumId);
+}
+
+tests {
+  test("creates an album and returns its generated id", function() {
+    expect(res.status).to.equal(201);
+    expect(res.body.title).to.equal(bru.getVar("testAlbumTitle"));
+    expect(res.body.artistId).to.equal(1);
+    expect(res.body.albumId).to.be.a("number");
+  });
+}

@@ -1,0 +1,20 @@
+meta {
+  name: List album keys
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/api/albums/keys
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns album key and title pairs", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body).to.be.an("array");
+    expect(res.body.length).to.be.greaterThan(0);
+    expect(res.body[0]).to.have.all.keys("key", "value");
+  });
+}

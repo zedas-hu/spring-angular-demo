@@ -1,0 +1,19 @@
+meta {
+  name: Get genre by id
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/genres/1
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns the requested genre", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.genreId).to.equal(1);
+    expect(res.body.name).to.be.a("string");
+  });
+}

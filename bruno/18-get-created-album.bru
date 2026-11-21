@@ -1,0 +1,19 @@
+meta {
+  name: Get created album
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/api/albums/{{testAlbumId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns the album created by this collection run", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.albumId).to.equal(bru.getVar("testAlbumId"));
+    expect(res.body.title).to.equal(bru.getVar("testAlbumTitle"));
+  });
+}

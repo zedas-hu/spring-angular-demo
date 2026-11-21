@@ -1,0 +1,20 @@
+meta {
+  name: List employees
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/employees
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns available employees with sign-in details", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body).to.be.an("array");
+    expect(res.body.length).to.be.greaterThan(0);
+    expect(res.body.some(employee => employee.email === "andrew@chinookcorp.com")).to.equal(true);
+  });
+}

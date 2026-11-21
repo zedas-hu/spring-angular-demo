@@ -1,0 +1,25 @@
+meta {
+  name: Reject album creation without a session
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/albums
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "Bruno unauthenticated album",
+    "artistName": "AC/DC",
+    "artistId": 1
+  }
+}
+
+tests {
+  test("rejects a protected write without signing in", function() {
+    expect(res.status).to.equal(401);
+  });
+}

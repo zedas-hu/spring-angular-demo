@@ -89,7 +89,9 @@ describe('Tracks', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.pager span')).toBeNull();
+    const pageNumber = fixture.nativeElement.querySelector('.pager span');
+    expect(pageNumber).not.toBeNull();
+    expect(pageNumber?.textContent?.trim()).toBe('');
   });
 
   it('requests the next page through the service pager', async () => {

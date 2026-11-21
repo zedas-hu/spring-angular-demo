@@ -1,0 +1,17 @@
+meta {
+  name: Sign out
+  type: http
+  seq: 24
+}
+
+delete {
+  url: {{baseUrl}}/api/login/session
+  body: none
+  auth: none
+}
+
+tests {
+  test("invalidates the active session", function() {
+    expect(res.status).to.equal(204);
+  });
+}

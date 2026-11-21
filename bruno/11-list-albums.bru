@@ -1,0 +1,21 @@
+meta {
+  name: List albums
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/api/albums
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns albums and their tracks", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body).to.be.an("array");
+    expect(res.body.length).to.be.greaterThan(0);
+    expect(res.body[0]).to.have.property("albumId");
+    expect(res.body[0].tracks).to.be.an("array");
+  });
+}

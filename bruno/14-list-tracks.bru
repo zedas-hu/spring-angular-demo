@@ -1,0 +1,23 @@
+meta {
+  name: List tracks with pagination and sorting
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/api/tracks?page=0&size=5&sort=name%2Casc
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns a sorted page of tracks with page metadata", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.content).to.be.an("array");
+    expect(res.body.content.length).to.be.greaterThan(0);
+    expect(res.body.content.length).to.be.at.most(5);
+    expect(res.body.page.number).to.equal(0);
+    expect(res.body.page.size).to.equal(5);
+    expect(res.body.page.totalElements).to.be.greaterThan(0);
+  });
+}

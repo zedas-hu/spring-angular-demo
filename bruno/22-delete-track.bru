@@ -1,0 +1,17 @@
+meta {
+  name: Delete track
+  type: http
+  seq: 22
+}
+
+delete {
+  url: {{baseUrl}}/api/tracks/{{testTrackId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("deletes the created track", function() {
+    expect(res.status).to.equal(204);
+  });
+}
