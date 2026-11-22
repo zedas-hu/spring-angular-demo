@@ -11,7 +11,7 @@
     "dev:recovery": "mvn -f backend/pom.xml -Pmapper-recovery clean compile && concurrently --kill-others --names backend,frontend \"mvn -f backend/pom.xml -Pmapper-recovery spring-boot:run\" \"npm:frontend:start\"",
     "frontend:test": "npm test --workspace frontend",
     "backend:test": "mvn -f backend/pom.xml test",
-    "bruno:test": "npm run backend:start & wait-on http://localhost:8080/api/tracks && cd bruno && bru run --env Local --tests-only",
+    "bruno:test": "concurrently --kill-others --success command-bruno --names backend,bruno \"npm:backend:start\" \"wait-on --timeout 60000 http-get://localhost:8080/api/tracks && cd bruno && bru run --env Local --tests-only\"",
     "test": "npm run frontend:test && npm run backend:test",
     "backend:compile": "mvn -f backend/pom.xml compile",
     "backend:start": "mvn -f backend/pom.xml spring-boot:run",
